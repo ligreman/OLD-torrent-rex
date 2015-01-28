@@ -1,0 +1,28 @@
+<div layout="column" flex layout-fill>
+    <div layout="row" layout-sm="column" layout-align="space-around" ng-show="loading">
+        <md-progress-circular class="md-accent" md-mode="indeterminate"></md-progress-circular>
+    </div>
+    <md-content class="overflowed-list">
+
+
+        <section ng-repeat="category in categories" ng-hide="loading">
+            <md-subheader class="md-primary custom">{{category.title}}</md-subheader>
+            <md-list layout="column">
+                <md-item ng-repeat="element in category.elements" ng-class="claseHover"
+                         ng-mouseenter="claseHover='item-hover'"
+                         ng-mouseleave="claseHover='item-no-hover'"
+                         ng-init="claseHover='item-no-hover'">
+                    <md-item-content>
+                        <div class="md-tile-left">
+
+                        </div>
+                        <div class="md-tile-content">
+                            <h3>{{element.name}}</h3>
+                            <h4>{{claseHover}}</h4>
+                        </div>
+                    </md-item-content>
+                </md-item>
+            </md-list>
+        </section>
+    </md-content>
+</div>

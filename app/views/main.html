@@ -1,23 +1,85 @@
-<div class="jumbotron">
-  <h1>'Allo, 'Allo!</h1>
-  <p class="lead">
-    <img src="images/yeoman.png" alt="I'm Yeoman"><br>
-    Always a pleasure scaffolding your apps.
-  </p>
-  <p><a class="btn btn-lg btn-success" ng-href="#">Splendid!<span class="glyphicon glyphicon-ok"></span></a></p>
-</div>
+<div layout="column" layout-fill>
 
-<div class="row marketing">
-  <h4>HTML5 Boilerplate</h4>
-  <p>
-    HTML5 Boilerplate is a professional front-end template for building fast, robust, and adaptable web apps or sites.
-  </p>
+    <md-toolbar>
+        <h2 class="md-toolbar-tools">
+            <span>Series en descarga</span>
+        </h2>
+    </md-toolbar>
 
-  <h4>Angular</h4>
-  <p>
-    AngularJS is a toolset for building the framework most suited to your application development.
-  </p>
+    <md-content ng-controller="PageController" class="footer-spacing">
+        <div>{{message}}</div>
+        <h2>Page:</h2>
 
-  <h4>Karma</h4>
-  <p>Spectacular Test Runner for JavaScript.</p>
+        <div>{{title}}</div>
+        <div>{{url}}</div>
+        <h2>Has Links:</h2>
+        <ul>
+            <li ng-repeat="pageInfo in pageInfos">
+                <div>{{pageInfo.url}}</div>
+            </li>
+        </ul>
+
+        <ul>
+            <li>Patata 1</li>
+            <li>Patata 1</li>
+            <li>Patata 1</li>
+            <li>Patata 1</li>
+            <li>Patata 1</li>
+            <li>Patata 1</li>
+            <li>Patata 1</li>
+            <li>Patata 1</li>
+            <li>Patata 1</li>
+            <li>Patata 1</li>
+            <li>Patata 1</li>
+            <li>Patata 1</li>
+            <li>Patata 1</li>
+            <li>Patata 1</li>
+            <li>Patata 1</li>
+            <li>Patata 1</li>
+            <li>Patata 1</li>
+            <li>Patata 1</li>
+            <li>Patata 1</li>
+            <li>Patata 1</li>
+            <li>Patata 1</li>
+            <li>Patata 1</li>
+            <li>Patata 1</li>
+            <li>Patata 1</li>
+            <li>Patata 1</li>
+            <li>Patata 1</li>
+            <li>Patata 1</li>
+            <li>Patata 1</li>
+            <li>Patata 1</li>
+            <li>Patata 1</li>
+            <li>Patata 1</li>
+            <li>Patata 1</li>
+            <li>Patata 1</li>
+            <li>Patata 1</li>
+            <li>Patata 1</li>
+            <li>Patata 1</li>
+            <li>Patata 1</li>
+            <li>Patata 1</li>
+            <li>Patata 1</li>
+            <li>Patata 1</li>
+            <li>Patata 1</li>
+            <li>Patata 1</li>
+            <li>Patata 1</li>
+            <li>Patata 1</li>
+            <li>Patata 1</li>
+            <li>Patata 1</li>
+            <li>Patata 1</li>
+        </ul>
+
+
+    </md-content>
+
+    <md-toolbar class="md-medium-tall fixed bottom-right transparent">
+        <span flex></span>
+
+        <div class="md-toolbar-tools md-toolbar-tools-bottom">
+            <md-button class="md-primary md-fab md-fab-bottom-right" ng-click="goto('series')">
+                <!--<md-icon icon="img/icons/ic_insert_drive_file_24px.svg" style="width: 24px; height: 24px;"></md-icon>-->
+                +
+            </md-button>
+        </div>
+    </md-toolbar>
 </div>
