@@ -1,0 +1,43 @@
+﻿{
+    "name": "TorrentRex",
+    "version": "1.0.0",
+    "manifest_version": 2,
+    "description": "Chrome extensions with AngularJS",
+    //"default_locale": "es",
+    "icons": {
+        "128": "icon128.png"
+    },
+    "browser_action": {
+        "default_icon": {
+            "19": "images/defaultIcon19x19.png",
+            "38": "images/defaultIcon38x38.png"
+        },
+        "default_popup": "popup.html",
+        "default_title": "Torrent Rex"
+    },
+    "background": {
+        "scripts": ["scripts/events.js"],
+        "persistent": false
+    },
+
+    "content_scripts": [
+        {
+            "js": [
+                "scripts/lib/jquery-1.8.2.min.js",
+                "scripts/content.js"
+            ],
+            "matches": ["*://*/*"],
+            "run_at": "document_start"
+        }
+    ],
+    "minimum_chrome_version": "18",
+    "permissions": [
+        "http://*/*",
+        "https://*/*",
+        "unlimitedStorage",
+        "contextMenus",
+        "cookies",
+        "tabs",
+        "notifications"
+    ]
+}
