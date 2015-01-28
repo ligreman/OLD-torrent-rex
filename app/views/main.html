@@ -1,23 +1,12 @@
 <div layout="column" layout-fill>
 
-    <md-toolbar>
+    <md-toolbar class="fixed">
         <h2 class="md-toolbar-tools">
-            <span>Series en descarga</span>
+            <span class="negrita">Series en descarga</span>
         </h2>
     </md-toolbar>
 
-    <md-content ng-controller="PageController" class="footer-spacing">
-        <div>{{message}}</div>
-        <h2>Page:</h2>
-
-        <div>{{title}}</div>
-        <div>{{url}}</div>
-        <h2>Has Links:</h2>
-        <ul>
-            <li ng-repeat="pageInfo in pageInfos">
-                <div>{{pageInfo.url}}</div>
-            </li>
-        </ul>
+    <md-content class="header-spacing footer-spacing">
 
         <ul>
             <li>Patata 1</li>
@@ -76,7 +65,7 @@
         <span flex></span>
 
         <div class="md-toolbar-tools md-toolbar-tools-bottom">
-            <md-button class="md-primary md-fab md-fab-bottom-right" ng-click="goto('series')">
+            <md-button class="md-accent md-fab md-fab-bottom-right" ng-click="goto('series')">
                 <!--<md-icon icon="img/icons/ic_insert_drive_file_24px.svg" style="width: 24px; height: 24px;"></md-icon>-->
                 +
             </md-button>

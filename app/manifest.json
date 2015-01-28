@@ -21,6 +21,7 @@
     },
     "minimum_chrome_version": "18",
     "permissions": [
+        "downloads",
         "http://*/*",
         "https://*/*",
         "unlimitedStorage",

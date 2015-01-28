@@ -13,6 +13,10 @@ body {
     user-select: none;
 }
 
+.negrita {
+    font-weight: bold;
+}
+
 .fixed {
     position: fixed;
 }
@@ -30,14 +34,19 @@ body {
     margin-bottom: 100px;
 }
 
+.header-spacing {
+    padding-top: 66px;
+}
+
 .overflowed-list {
     overflow: hidden;
-    overflow-y: auto;
+    overflow-y: scroll;
     height: 600px;
+    position: relative;
 }
 
 .md-subheader.md-primary.custom {
-    background-color: #3F51B5;
+    background-color: #7986CB;
     color: #FFFFFF;
     margin-right: 2px;
     font-weight: bold;
@@ -45,11 +54,13 @@ body {
 }
 
 .md-subheader.md-primary.custom.md-sticky-clone {
+    top: 68px;
+    width: 477px;
 }
 
 .item-hover {
     cursor: pointer;
-    background-color: #3F51B5;
+    background-color: #E8EAF6;
     -webkit-transition: all 0.2s;
     transition: all 0.2s;
 }
@@ -59,4 +70,12 @@ body {
     background-color: transparent;
     -webkit-transition: all 0.2s;
     transition: all 0.2s;
+}
+
+md-toolbar.custom {
+    width: 477px;
+}
+
+md-progress-circular.center {
+    margin: 30px auto;
 }

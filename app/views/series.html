@@ -1,17 +1,25 @@
-<div layout="column" flex layout-fill>
-    <div layout="row" layout-sm="column" layout-align="space-around" ng-show="loading">
-        <md-progress-circular class="md-accent" md-mode="indeterminate"></md-progress-circular>
-    </div>
-    <md-content class="overflowed-list">
+<div layout="column" layout-fill>
 
+    <md-toolbar class="fixed custom">
+        <h2 class="md-toolbar-tools">
+            <span class="negrita">Añadir serie</span>
+        </h2>
+    </md-toolbar>
+
+    <md-content class="overflowed-list header-spacing">
+        <div layout="row" layout-sm="column" layout-align="space-around" ng-show="loading">
+            <md-progress-circular class="md-primary center" md-mode="indeterminate"></md-progress-circular>
+        </div>
 
         <section ng-repeat="category in categories" ng-hide="loading">
             <md-subheader class="md-primary custom">{{category.title}}</md-subheader>
             <md-list layout="column">
-                <md-item ng-repeat="element in category.elements" ng-class="claseHover"
+                <md-item ng-repeat="element in category.elements"
+                         ng-class="claseHover"
                          ng-mouseenter="claseHover='item-hover'"
                          ng-mouseleave="claseHover='item-no-hover'"
-                         ng-init="claseHover='item-no-hover'">
+                         ng-init="claseHover='item-no-hover'"
+                         ng-click="goto('chapters', element.url)">
                     <md-item-content>
                         <div class="md-tile-left">
 
@@ -25,4 +33,5 @@
             </md-list>
         </section>
     </md-content>
+
 </div>
