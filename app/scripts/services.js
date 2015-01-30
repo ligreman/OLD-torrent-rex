@@ -1,7 +1,8 @@
 var appServices = angular.module('appServices', []);
 
 appServices.service('paramService', function () {
-    var url = '';
+    var url = '', title = '',
+        seasonLimits = {}, chapterLimits = {};
 
     var setUrl = function (newUrl) {
         url = newUrl
@@ -11,16 +12,53 @@ appServices.service('paramService', function () {
         return url;
     };
 
+    var setTitle = function (newTitle) {
+        title = newTitle
+    };
+
+    var getTitle = function () {
+        return title;
+    };
+
+    var setSeasonLimits = function (min, max) {
+        seasonLimits = {
+            min: min,
+            max: max
+        }
+    };
+
+    var getSeasonLimits = function () {
+        return seasonLimits;
+    };
+
+    var setChapterLimits = function (min, max) {
+        chapterLimits = {
+            min: min,
+            max: max
+        }
+    };
+
+    var getChapterLimits = function () {
+        return chapterLimits;
+    };
+
     return {
         setUrl: setUrl,
-        getUrl: getUrl
+        getUrl: getUrl,
+        setTitle: setTitle,
+        getTitle: getTitle,
+        setSeasonLimits: setSeasonLimits,
+        getSeasonLimits: getSeasonLimits,
+        setChapterLimits: setChapterLimits,
+        getChapterLimits: getChapterLimits
     };
 
 });
 
 appServices.service('torrentService', function () {
     var processTorrents = function processTorrents(listaTorrents) {
-        var torrent, metadata, aux, ultimaTemporada = 0, temporadas = [], temporadaUltimoCapitulo = [];
+        var torrent, metadata, aux, ultimaTemporada = 0, temporadas = [], temporadaUltimoCapitulo = [],
+            temps = [], chaps = [], idiomaGeneral = '';
 
         //Recorro los torrents y voy extrayendo su metainformación
         for (var key in listaTorrents) {
@@ -44,7 +82,7 @@ appServices.service('torrentService', function () {
                         chapter: metadata.capitulo,
                         language: torrent.language,
                         languageTitle: metadata.idioma,
-                        category: aux[0],
+                        //category: aux[0],
                         size: torrent.size,
                         format: metadata.formato
                     };
@@ -58,16 +96,43 @@ appServices.service('torrentService', function () {
                     if (temporadaUltimoCapitulo[metadata.temporada] === undefined || temporadaUltimoCapitulo[metadata.temporada] < metadata.capitulo) {
                         temporadaUltimoCapitulo[metadata.temporada] = metadata.capitulo;
                     }
+
+                    //Idioma general
+                    if (idiomaGeneral === '') {
+                        idiomaGeneral = metadata.idioma;
+                    }
                 }
-                //torrent.id, .category, .language, .size
-
-
             }
         }
 
-        console.log(temporadas);
-        console.log(ultimaTemporada);
-        console.log(temporadaUltimoCapitulo);
+
+        for (var kk in temporadas) {
+            chaps = [];
+
+            if (temporadas.hasOwnProperty(kk)) {
+
+                for (var jj in temporadas[kk]) {
+                    if (temporadas[kk].hasOwnProperty(jj)) {
+                        chaps.push(temporadas[kk][jj]);
+                    }
+                }
+
+                temps.push({
+                    title: "Temporada " + kk,
+                    chapters: chaps,
+                    season: kk,
+                    lastChapter: temporadaUltimoCapitulo[kk]
+                });
+            }
+        }
+        console.log("TEMP");
+        console.log(temps);
+        return {
+            lastSeason: ultimaTemporada,
+            lastChapter: temporadaUltimoCapitulo[ultimaTemporada],
+            language: idiomaGeneral,
+            seasons: temps
+        };
     };
 
     return {

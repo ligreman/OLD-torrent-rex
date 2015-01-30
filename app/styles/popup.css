@@ -2,6 +2,10 @@ body {
     font-family: Helvetica, sans-serif;
 }
 
+html p, body p {
+    line-height: 1;
+}
+
 #popup {
     min-width: 500px;
     width: 500px;
@@ -15,6 +19,18 @@ body {
 
 .negrita {
     font-weight: bold;
+}
+
+.center {
+    text-align: center;
+}
+
+.right {
+    text-align: right;
+}
+
+.ptop10 {
+    padding-top: 10px;
 }
 
 .fixed {
@@ -78,4 +94,37 @@ md-toolbar.custom {
 
 md-progress-circular.center {
     margin: 30px auto;
+}
+
+.destacado {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 50px;
+    background-color: #BC9EFF;
+}
+
+.destacado h3 {
+    margin: 0;
+}
+
+.md-card-content p {
+    margin: 0;
+}
+
+.metainfo {
+    margin-left: 1em;
+    margin-right: 1em;
+}
+
+.metainfo p {
+    margin-left: 1.5em;
+}
+
+.md-tile-content {
+    padding: 8px;
+}
+
+.md-card-content {
+    padding: 5px 10px;
 }

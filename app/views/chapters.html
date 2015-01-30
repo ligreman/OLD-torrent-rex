@@ -11,7 +11,39 @@
             <md-progress-circular class="md-primary center" md-mode="indeterminate"></md-progress-circular>
         </div>
 
+        <div ng-hide="loading">
+            <div class="row metainfo">
+                <h1>{{title}}</h1>
+                <p>Idioma: {{info.language}}</p>
+                <p>Última emisión: Temporada {{info.lastSeason}} - Capítulo {{info.lastChapter}}</p>
+            </div>
 
+            <div class="center">
+                <md-button class="md-raised md-primary" ng-click="showAdd($event)">Añadir a descargas</md-button>
+            </div>
+
+            <br />
+
+            <div ng-repeat="temporada in info.seasons">
+                <div layout="row">
+                    <h2 class="metainfo" flex>{{temporada.title}}</h2>
+                    <p class="metainfo right ptop10" flex>Último capítulo emitido: {{temporada.lastChapter}}</p>
+                </div>
+
+                <md-card ng-repeat="capi in temporada.chapters">
+                    <div class="destacado">
+                        <h3>{{capi.title}}</h3>
+                    </div>
+                    <md-card-content>
+                        <div layout="row">
+                            <div flex>Idioma: {{capi.languageTitle}}</div>
+                            <div flex>Tamaño: {{capi.size}} [{{capi.format}}]</div>
+                        </div>
+                        <p class="right"><a href="#" ng-click="download('{{capi.id}}')">Torrent</a></p>
+                    </md-card-content>
+                </md-card>
+            </div>
+        </div>
     </md-content>
 
 </div>

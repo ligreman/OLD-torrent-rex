@@ -1,0 +1,51 @@
+<md-dialog>
+    <md-content>
+        <h2>Añadir serie a descargas automáticas</h2>
+        <p>Elige la temporada y episodio desde el que empezar a descargar</p>
+
+        <form name="fromForm">
+            <md-input-container flex>
+                <label>Descargar desde la temporada</label>
+                <input type="number" min="{{seasonLimits.min}}" max="{{seasonLimits.max}}" name="fromSeason"
+                       ng-model="fromSeason" required>
+                <span class="error" ng-show="fromForm.fromSeason.$error.required">Required!</span>
+                <span class="error" ng-show="fromForm.fromSeason.$error.min">Menor!</span>
+                <span class="error" ng-show="fromForm.fromSeason.$error.max">Mayor!</span>
+                <span class="error" ng-show="fromForm.fromSeason.$error.number">Not valid number!</span>
+            </md-input-container>
+
+            <md-input-container flex>
+                <label>Desde el episodio</label>
+                <input type="number" min="{{chapterLimits.min}}"
+                       name="fromChapter" ng-model="fromChapter" required>
+                <span class="error" ng-show="fromForm.fromChapter.$error.required">Required!</span>
+                <span class="error" ng-show="fromForm.fromChapter.$error.min">Menor!</span>
+                <span class="error" ng-show="fromForm.fromChapter.$error.number">Not valid number!</span>
+            </md-input-container>
+        </form>
+
+        <p>
+            The highest concentration of Mangifera genus is in the western part of Malesia (Sumatra, Java and Borneo)
+            and in Burma and India. While other Mangifera species (e.g. horse mango, M. foetida) are also grown on a
+            more localized basis, Mangifera indica—the "common mango" or "Indian mango"—is the only mango tree commonly
+            cultivated in many tropical and subtropical regions.
+        </p>
+        <p>
+            {{fromSeason}}
+        </p>
+    </md-content>
+    <div class="md-actions" layout="row">
+        <md-button href="http://en.wikipedia.org/wiki/Mango" target="_blank" hide show-md>
+            More on Wikipedia
+        </md-button>
+        <span flex></span>
+        <md-button ng-click="answer('not useful')">
+            Not Useful
+        </md-button>
+        <md-button ng-disabled="!fromForm.$valid"
+                   ng-click="answer({fromTemporada:fromSeason, fromEpisodio:fromChapter})"
+                   class="md-primary">
+            Useful
+        </md-button>
+    </div>
+</md-dialog>

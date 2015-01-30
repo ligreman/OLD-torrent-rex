@@ -23,20 +23,27 @@ appControllers.controller('SeriesCtrl', ['$scope', '$location', '$http', 'paramS
             });
 
         //GoTo
-        $scope.goto = function (path, param) {
+        $scope.goto = function (path, param, name) {
             console.log("me voy de aqui " + param);
             paramService.setUrl(param);
+            paramService.setTitle(name);
             $location.path('/' + path);
         };
     }]);
 
 
 //Controlador de la vista de Añadir series - Capítulos
-appControllers.controller('ChaptersCtrl', ['$scope', '$location', '$http', 'paramService', 'torrentService',
-    function ($scope, $location, $http, paramService, torrentService) {
+appControllers.controller('ChaptersCtrl', ['$scope', '$location', '$http', '$mdDialog', 'paramService', 'torrentService',
+    function ($scope, $location, $http, $mdDialog, paramService, torrentService) {
         $scope.loading = true;
+        $scope.info;
+        $scope.chapLimits;
+
+        $scope.fromSeason = 0;
+        $scope.fromChapter = 0;
 
         $scope.url = paramService.getUrl();
+        $scope.title = paramService.getTitle();
         console.log("He llegao: " + $scope.url);
 
         //Petición de los torrents
@@ -45,8 +52,45 @@ appControllers.controller('ChaptersCtrl', ['$scope', '$location', '$http', 'para
                 console.log(data);
                 $scope.loading = false;
 
-                $scope.torrents = torrentService.processTorrents(data.torrents);
+                $scope.info = torrentService.processTorrents(data.torrents);
             });
+
+        //Descarga de un torrent
+        $scope.download = function (torrentId) {
+            chrome.downloads.download({
+                url: "http://txibitsoft.com/bajatorrent.php?id=" + torrentId
+            });
+        };
+
+        //Añadir una descarga - dialogo
+        $scope.showAdd = function (ev) {
+            if ($scope.info === null) {
+                return null;
+            }
+
+            //Limites de capitulos por temporada
+            $scope.chapLimits = [];
+            for (var k in $scope.info.seasons) {
+                if ($scope.info.seasons.hasOwnProperty(k)) {
+                    var tempo = $scope.info.seasons[k];
+                    $scope.chapLimits[tempo.season] = tempo.lastChapter;
+                }
+            }
+
+            paramService.setSeasonLimits(1, $scope.info.lastSeason);
+            paramService.setChapterLimits(1, $scope.chapLimits);
+
+            $mdDialog.show({
+                controller: DialogController,
+                templateUrl: 'views/templates/addDialog.tmpl.html',
+                targetEvent: ev
+            }).then(function (answer) {
+                //Acepto y añado la serie
+                console.log('You said the information was "' + answer.fromTemporada + answer.fromEpisodio + '".');
+            }, function () {
+                //Cancelo el dialogo
+            });
+        };
 
         //GoTo
         $scope.goto = function (path) {
@@ -54,10 +98,26 @@ appControllers.controller('ChaptersCtrl', ['$scope', '$location', '$http', 'para
         };
     }]);
 
+function DialogController($scope, $mdDialog, paramService) {
+    $scope.seasonLimits = paramService.getSeasonLimits();
+    $scope.chapterLimits = paramService.getChapterLimits();
+
+    $scope.hide = function () {
+        $mdDialog.hide();
+    };
+    $scope.cancel = function () {
+        $mdDialog.cancel();
+    };
+    $scope.answer = function (answer) {
+        $mdDialog.hide(answer);
+    };
+}
+
 /*
+ $scope.download = function () {
  chrome.downloads.download({
- url: "http://your.url/to/download",
- filename: "suggested/filename/with/relative.path" // Optional
+ url: "http://txibitsoft.com/bajatorrent.php?id=133862"
  });
+ };
 
  */
