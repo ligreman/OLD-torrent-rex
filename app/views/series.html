@@ -1,9 +1,14 @@
 <div layout="column" layout-fill>
 
     <md-toolbar class="fixed custom">
-        <h2 class="md-toolbar-tools">
-            <span class="negrita">Añadir serie</span>
-        </h2>
+        <div layout="row">
+            <md-button ng-click="goto('main')">
+                <md-icon icon="images/ic_arrow_back_white_24dp.png" style="width: 24px; height: 24px;"></md-icon>
+            </md-button>
+            <h2 class="md-toolbar-tools">
+                <span class="negrita">Añadir serie</span>
+            </h2>
+        </div>
     </md-toolbar>
 
     <md-content class="overflowed-list header-spacing">

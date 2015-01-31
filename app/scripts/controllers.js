@@ -3,6 +3,22 @@ var appControllers = angular.module('appControllers', []);
 //Controlador de la vista inicial
 appControllers.controller('MainCtrl', ['$scope', '$location', '$http',
     function ($scope, $location, $http) {
+        $scope.series = JSON.parse(localStorage.getItem('series'));
+        $scope.trexStatus = (localStorage.getItem('trexStatus') === 'true');
+
+        $scope.changeTrexStatus = function () {
+            localStorage.setItem('trexStatus', $scope.trexStatus);
+            checkAlarms();
+        };
+
+        //Actualizar las series ya que he cambiado el status de alguna
+        $scope.updateSeries = function () {
+            localStorage.setItem('series', JSON.stringify($scope.series));
+        };
+
+        //Alarmas
+        checkAlarms();
+
         //GoTo
         $scope.goto = function (path) {
             $location.path('/' + path);
@@ -33,8 +49,8 @@ appControllers.controller('SeriesCtrl', ['$scope', '$location', '$http', 'paramS
 
 
 //Controlador de la vista de Añadir series - Capítulos
-appControllers.controller('ChaptersCtrl', ['$scope', '$location', '$http', '$mdDialog', 'paramService', 'torrentService',
-    function ($scope, $location, $http, $mdDialog, paramService, torrentService) {
+appControllers.controller('ChaptersCtrl', ['$scope', '$location', '$http', '$mdDialog', '$mdToast', 'paramService', 'torrentService',
+    function ($scope, $location, $http, $mdDialog, $mdToast, paramService, torrentService) {
         $scope.loading = true;
         $scope.info;
         $scope.chapLimits;
@@ -42,9 +58,26 @@ appControllers.controller('ChaptersCtrl', ['$scope', '$location', '$http', '$mdD
         $scope.fromSeason = 0;
         $scope.fromChapter = 0;
 
+        //URL y título de la serie. El título no tiene metainformación
         $scope.url = paramService.getUrl();
         $scope.title = paramService.getTitle();
         console.log("He llegao: " + $scope.url);
+
+        //Toasts
+        $scope.toastPosition = {bottom: true, top: false, left: false, right: true};
+        $scope.getToastPosition = function () {
+            return Object.keys($scope.toastPosition).filter(function (pos) {
+                return $scope.toastPosition[pos];
+            }).join(' ');
+        };
+        $scope.showSimpleToast = function (msg) {
+            $mdToast.show(
+                $mdToast.simple()
+                    .content(msg)
+                    .position($scope.getToastPosition())
+                    .hideDelay(3000)
+            );
+        };
 
         //Petición de los torrents
         $http.get('http://trex-lovehinaesp.rhcloud.com/api/tx/torrents/' + $scope.url).
@@ -60,6 +93,12 @@ appControllers.controller('ChaptersCtrl', ['$scope', '$location', '$http', '$mdD
             chrome.downloads.download({
                 url: "http://txibitsoft.com/bajatorrent.php?id=" + torrentId
             });
+        };
+
+
+        $scope.deleteStorage = function () {
+            //chrome.storage.local.set({'series': []});
+            localStorage.removeItem('series');
         };
 
         //Añadir una descarga - dialogo
@@ -85,10 +124,55 @@ appControllers.controller('ChaptersCtrl', ['$scope', '$location', '$http', '$mdD
                 templateUrl: 'views/templates/addDialog.tmpl.html',
                 targetEvent: ev
             }).then(function (answer) {
-                //Acepto y añado la serie
-                console.log('You said the information was "' + answer.fromTemporada + answer.fromEpisodio + '".');
+                console.log("Voy a guardar " + answer);
+                //La añado a las ya existentes
+                //chrome.storage.local.get('series', function (items) {
+                var yaExiste = false,
+                    actualSeries = JSON.parse(localStorage.getItem('series'));
+                //actualSeries = items.series;
+                console.log("Tengo:");
+                console.log(actualSeries);
+
+                if (actualSeries === null || actualSeries === undefined) {
+                    actualSeries = [];
+                }
+
+                //Compruebo que la serie no esté ya añadida
+                for (var i = 0; i < actualSeries.length; i++) {
+                    console.log("A ver si esta ya existe: " + actualSeries[i].title)
+                    if (actualSeries[i].title == $scope.title) {
+                        console.log("Pozi");
+                        //Error serie ya existe
+                        $scope.showSimpleToast('La serie ya estaba descargándose.');
+                        yaExiste = true;
+                    }
+                }
+                console.log("Existia: " + yaExiste);
+                if (!yaExiste) {
+                    console.log("Amo a ver");
+                    //Inicializo si hace falta
+                    console.log("uyuyuyu");
+                    actualSeries.push({
+                        title: $scope.title,
+                        url: $scope.url,
+                        language: $scope.info.language,
+                        lastSeason: answer.fromTemporada,
+                        lastChapter: answer.fromEpisodio,
+                        active: true
+                    });
+                    console.log("Meto");
+                    console.log(actualSeries);
+                    //Actualizo el storage
+                    chrome.storage.local.set({'series': actualSeries}, function () {
+                        //Todo ok
+                        $scope.showSimpleToast('Serie añadida correctamente.');
+                        console.log("TOOK");
+                        //Lanzo un chequeo de series
+                    });
+                    localStorage.setItem('series', JSON.stringify(actualSeries));
+                }
+                //});
             }, function () {
-                //Cancelo el dialogo
             });
         };
 
@@ -97,6 +181,9 @@ appControllers.controller('ChaptersCtrl', ['$scope', '$location', '$http', '$mdD
             $location.path('/' + path);
         };
     }]);
+
+
+/*********** FUNCIONES AUXILIARES ****************/
 
 function DialogController($scope, $mdDialog, paramService) {
     $scope.seasonLimits = paramService.getSeasonLimits();
@@ -113,11 +200,21 @@ function DialogController($scope, $mdDialog, paramService) {
     };
 }
 
-/*
- $scope.download = function () {
- chrome.downloads.download({
- url: "http://txibitsoft.com/bajatorrent.php?id=133862"
- });
- };
+function checkAlarms() {
+    console.log("alarm");
+    var status = (localStorage.getItem('trexStatus') === 'true'),
+        alarma;
 
- */
+    if (status) {
+        //La creo. Como va con nombre no hay problema de duplicados
+        chrome.alarms.create('trex', {
+            delayInMinutes: 1,
+            periodInMinutes: 1
+        });
+        console.log("alarma creada");
+    } else {
+        //Desactivo alarmas
+        chrome.alarms.clear('trex');
+        console.log("alarma desactivada");
+    }
+}

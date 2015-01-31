@@ -33,5 +33,5 @@
         //El Theme
         $mdThemingProvider.theme('default')
             .primaryColor('indigo')
-            .accentColor('cyan');
+            .accentColor('green');
     }]);

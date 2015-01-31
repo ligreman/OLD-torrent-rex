@@ -1,73 +1,41 @@
 <div layout="column" layout-fill>
 
     <md-toolbar class="fixed">
-        <h2 class="md-toolbar-tools">
-            <span class="negrita">Series en descarga</span>
-        </h2>
+        <div layout="row">
+            <h2 class="md-toolbar-tools" flex="75">
+                <span class="negrita">Series en descarga {{trexStatus}}</span>
+            </h2>
+
+            <md-switch ng-model="trexStatus" name="trexStatus" ng-change="changeTrexStatus()"
+                       class="md-accent right" flex>
+                {{trexStatus?'Activo':'Inactivo'}}
+            </md-switch>
+        </div>
     </md-toolbar>
 
     <md-content class="header-spacing footer-spacing">
-
-        <ul>
-            <li>Patata 1</li>
-            <li>Patata 1</li>
-            <li>Patata 1</li>
-            <li>Patata 1</li>
-            <li>Patata 1</li>
-            <li>Patata 1</li>
-            <li>Patata 1</li>
-            <li>Patata 1</li>
-            <li>Patata 1</li>
-            <li>Patata 1</li>
-            <li>Patata 1</li>
-            <li>Patata 1</li>
-            <li>Patata 1</li>
-            <li>Patata 1</li>
-            <li>Patata 1</li>
-            <li>Patata 1</li>
-            <li>Patata 1</li>
-            <li>Patata 1</li>
-            <li>Patata 1</li>
-            <li>Patata 1</li>
-            <li>Patata 1</li>
-            <li>Patata 1</li>
-            <li>Patata 1</li>
-            <li>Patata 1</li>
-            <li>Patata 1</li>
-            <li>Patata 1</li>
-            <li>Patata 1</li>
-            <li>Patata 1</li>
-            <li>Patata 1</li>
-            <li>Patata 1</li>
-            <li>Patata 1</li>
-            <li>Patata 1</li>
-            <li>Patata 1</li>
-            <li>Patata 1</li>
-            <li>Patata 1</li>
-            <li>Patata 1</li>
-            <li>Patata 1</li>
-            <li>Patata 1</li>
-            <li>Patata 1</li>
-            <li>Patata 1</li>
-            <li>Patata 1</li>
-            <li>Patata 1</li>
-            <li>Patata 1</li>
-            <li>Patata 1</li>
-            <li>Patata 1</li>
-            <li>Patata 1</li>
-            <li>Patata 1</li>
-        </ul>
-
-
+        <md-card ng-repeat="serie in series">
+            <div layout="row" ng-class="(serie.active)?'serie-enabled':'serie-disabled'">
+                <div flex="75">
+                    <h3>{{serie.title}}</h3>
+                </div>
+                <md-switch ng-model="serie.active" name="serie.active" ng-change="updateSeries()"
+                           class="md-accent right" aria-label="" flex>
+                    {{serie.active?'Activo':'Inactivo'}}
+                </md-switch>
+            </div>
+            <md-card-content>
+                <p>Último capítulo descargado: Temporada {{serie.lastSeason}} - Capítulo {{serie.lastChapter}}</p>
+            </md-card-content>
+        </md-card>
     </md-content>
 
     <md-toolbar class="md-medium-tall fixed bottom-right transparent">
         <span flex></span>
 
         <div class="md-toolbar-tools md-toolbar-tools-bottom">
-            <md-button class="md-primary md-fab md-fab-bottom-right" ng-click="goto('series')">
-                <!--<md-icon icon="img/icons/ic_insert_drive_file_24px.svg" style="width: 24px; height: 24px;"></md-icon>-->
-                +
+            <md-button class="md-primary md-fab md-fab-bottom-right" ng-click="goto('series')" aria-label="">
+                <md-icon icon="images/ic_add_white_24dp.png" style="width: 24px; height: 24px;"></md-icon>
             </md-button>
         </div>
     </md-toolbar>

@@ -125,6 +125,27 @@ md-progress-circular.center {
     padding: 8px;
 }
 
-.md-card-content {
-    padding: 5px 10px;
+md-card md-card-content {
+    padding: 10px;
+}
+
+md-switch .md-label {
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+md-switch:focus .md-label:not(:empty) {
+    border-style: none !important;
+}
+
+.serie-enabled {
+    height: 40px;
+    padding-left: 30px;
+    background-color: #A5D6A7;
+}
+
+.serie-disabled {
+    height: 40px;
+    padding-left: 30px;
+    background-color: #EF9A9A;
 }

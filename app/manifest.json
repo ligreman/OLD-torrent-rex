@@ -17,17 +17,15 @@
     },
     "background": {
         "scripts": ["scripts/events.js"],
-        "persistent": false
+        "persistent": true
     },
     "minimum_chrome_version": "18",
     "permissions": [
         "downloads",
-        "http://*/*",
-        "https://*/*",
-        "unlimitedStorage",
-        "contextMenus",
-        "cookies",
-        "tabs",
-        "notifications"
+        "storage",
+        "alarms",
+        "notifications",
+        "http://trex-lovehinaesp.rhcloud.com/api/tx/*",
+        "http://txibitsoft.com/*"
     ]
 }

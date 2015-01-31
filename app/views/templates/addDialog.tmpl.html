@@ -35,11 +35,7 @@
         </p>
     </md-content>
     <div class="md-actions" layout="row">
-        <md-button href="http://en.wikipedia.org/wiki/Mango" target="_blank" hide show-md>
-            More on Wikipedia
-        </md-button>
-        <span flex></span>
-        <md-button ng-click="answer('not useful')">
+        <md-button ng-click="cancel()">
             Not Useful
         </md-button>
         <md-button ng-disabled="!fromForm.$valid"
