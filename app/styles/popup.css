@@ -149,3 +149,8 @@ md-switch:focus .md-label:not(:empty) {
     padding-left: 30px;
     background-color: #EF9A9A;
 }
+
+md-dialog p {
+    line-height: 1.5;
+    text-align: justify;
+}

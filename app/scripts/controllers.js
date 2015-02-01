@@ -1,14 +1,20 @@
 var appControllers = angular.module('appControllers', []);
 
 //Controlador de la vista inicial
-appControllers.controller('MainCtrl', ['$scope', '$location', '$http',
-    function ($scope, $location, $http) {
+appControllers.controller('MainCtrl', ['$scope', '$location', '$http', '$mdDialog',
+    function ($scope, $location, $http, $mdDialog) {
         $scope.series = JSON.parse(localStorage.getItem('series'));
         $scope.trexStatus = (localStorage.getItem('trexStatus') === 'true');
 
         $scope.changeTrexStatus = function () {
             localStorage.setItem('trexStatus', $scope.trexStatus);
             checkAlarms();
+
+            if ($scope.trexStatus) {
+                chrome.browserAction.setIcon({path: 'images/activeIcon.png'});
+            } else {
+                chrome.browserAction.setIcon({path: 'images/defaultIcon38x38.png'});
+            }
         };
 
         //Actualizar las series ya que he cambiado el status de alguna
@@ -16,13 +22,54 @@ appControllers.controller('MainCtrl', ['$scope', '$location', '$http',
             localStorage.setItem('series', JSON.stringify($scope.series));
         };
 
+        //Quitar una serie
+        $scope.removeSerie = function (ev, serieTitle) {
+            var confirm = $mdDialog.confirm()
+                .title('¿Eliminar descarga?')
+                .content('Se dejará de descargar ' + serieTitle + '.')
+                .ariaLabel('')
+                .ok('Aceptar')
+                .cancel('Cancelar')
+                .targetEvent(ev);
+            $mdDialog.show(confirm).then(function () {
+                console.log("A eliminar " + serieTitle);
+                var auxSeries = JSON.parse(localStorage.getItem('series'));
+
+                for (var i = 0; i < auxSeries.length; i++) {
+                    if (auxSeries[i].title == serieTitle) {
+                        auxSeries.splice(i, 1);
+                        break;
+                    }
+                }
+
+                $scope.series = auxSeries;
+                localStorage.setItem('series', JSON.stringify($scope.series));
+            }, function () {
+            });
+        };
+
         //Alarmas
         checkAlarms();
+
+        //Notificaciones
+        checkNotifications();
 
         //GoTo
         $scope.goto = function (path) {
             $location.path('/' + path);
         };
+
+        //About
+        $scope.about = function (ev) {
+            $mdDialog.show(
+                $mdDialog.alert()
+                    .title('Acerca de Torrent Rex')
+                    .content('Torrent Rex comprobará al arrancar el navegador, al activarse y cada hora (siempre que esté activo) si existen nuevos episodios de tus series favoritas, descargándo automáticamente los torrents a la carpeta de Descargas predefinida en tu navegador.')
+                    .ariaLabel('')
+                    .ok('¡Me mola!')
+                    .targetEvent(ev)
+            );
+        }
     }]);
 
 //Controlador de la vista de Añadir serie - Categorias
@@ -90,6 +137,7 @@ appControllers.controller('ChaptersCtrl', ['$scope', '$location', '$http', '$mdD
 
         //Descarga de un torrent
         $scope.download = function (torrentId) {
+            console.log("ID: " + torrentId);
             chrome.downloads.download({
                 url: "http://txibitsoft.com/bajatorrent.php?id=" + torrentId
             });
@@ -97,7 +145,6 @@ appControllers.controller('ChaptersCtrl', ['$scope', '$location', '$http', '$mdD
 
 
         $scope.deleteStorage = function () {
-            //chrome.storage.local.set({'series': []});
             localStorage.removeItem('series');
         };
 
@@ -126,10 +173,9 @@ appControllers.controller('ChaptersCtrl', ['$scope', '$location', '$http', '$mdD
             }).then(function (answer) {
                 console.log("Voy a guardar " + answer);
                 //La añado a las ya existentes
-                //chrome.storage.local.get('series', function (items) {
                 var yaExiste = false,
                     actualSeries = JSON.parse(localStorage.getItem('series'));
-                //actualSeries = items.series;
+
                 console.log("Tengo:");
                 console.log(actualSeries);
 
@@ -216,5 +262,28 @@ function checkAlarms() {
         //Desactivo alarmas
         chrome.alarms.clear('trex');
         console.log("alarma desactivada");
+    }
+}
+
+function checkNotifications() {
+    var notis = JSON.parse(localStorage.getItem('notifications')),
+        listaNotis = [];
+
+    if (notis !== undefined && notis !== null && notis.length > 0) {
+        for (var i = 0; i < notis.length; i++) {
+            chrome.notifications.create('', {
+                type: "basic",
+                title: "TRex - " + notis[i].date,
+                message: notis[i].text,
+                iconUrl: "images/downloaded.png"
+            }, function (nid) {
+            });
+        }
+
+        //Limpio las notificaciones ya mostradas
+        localStorage.setItem('notifications', JSON.stringify([]));
+        chrome.browserAction.setBadgeText({
+            text: ""
+        });
     }
 }

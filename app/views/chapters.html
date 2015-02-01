@@ -6,7 +6,7 @@
                 <md-icon icon="images/ic_arrow_back_white_24dp.png" style="width: 24px; height: 24px;"></md-icon>
             </md-button>
             <h2 class="md-toolbar-tools">
-                <span class="negrita">Capítulos</span>
+                <span class="negrita">Episodios de {{title}}</span>
             </h2>
         </div>
     </md-toolbar>
@@ -25,7 +25,7 @@
 
             <div class="center" ng-hide="info.lastSeason == 0">
                 <md-button class="md-raised md-primary" ng-click="showAdd($event)">Añadir a descargas</md-button>
-                <md-button class="md-raised md-primary" ng-click="deleteStorage()">Borrar storage</md-button>
+                <!--<md-button class="md-raised md-primary" ng-click="deleteStorage()">Borrar storage</md-button>-->
             </div>
 
             <br />
@@ -45,7 +45,9 @@
                             <div flex>Idioma: {{capi.languageTitle}}</div>
                             <div flex>Tamaño: {{capi.size}} [{{capi.format}}]</div>
                         </div>
-                        <p class="right"><a href="#" ng-click="download('{{capi.id}}')">Torrent</a></p>
+                        <p class="right">
+                            <md-button class="md-primary" ng-click="download(capi.id)">Torrent</md-button>
+                        </p>
                     </md-card-content>
                 </md-card>
             </div>

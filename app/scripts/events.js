@@ -90,15 +90,6 @@ function checkDownloads() {
             };
             xmlhttp.open("GET", 'http://trex-lovehinaesp.rhcloud.com/api/tx/torrents/' + series[i].url, false);
             xmlhttp.send();
-
-            /*$http.get('http://trex-lovehinaesp.rhcloud.com/api/tx/torrents/' + url).
-             success(function (data) {
-             console.log("he pedido al ws esto:");
-             console.log(data);
-             datos = procesarTorrents(data.torrents);
-             console.log("me devuelve");
-             console.log(datos);
-             });*/
         }
 
         //Descargo lo nuevo
@@ -138,12 +129,14 @@ function checkDownloads() {
             localStorage.setItem('notifications', JSON.stringify(notifications));
 
             //Pongo numerito en el icono
-            chrome.browserAction.setBadgeText({
-                text: "" + notifications.length
-            });
-            chrome.browserAction.setBadgeBackgroundColor({
-                color: '#1B5E20'
-            });
+            if (notifications.length > 0) {
+                chrome.browserAction.setBadgeText({
+                    text: "" + notifications.length
+                });
+                chrome.browserAction.setBadgeBackgroundColor({
+                    color: '#1B5E20'
+                });
+            }
         }
     }
 }
@@ -160,6 +153,27 @@ chrome.alarms.onAlarm.addListener(function (alarm) {
 //Al iniciar navegador compruebo (le doy un minuto)
 setTimeout(checkDownloads, 60 * 1000);
 
+//Icono
+var statusTrexIcon = (localStorage.getItem('trexStatus') === 'true');
+if (statusTrexIcon) {
+    chrome.browserAction.setIcon({path: 'images/activeIcon.png'});
+}
+delete statusTrexIcon;
+
+//Notificaciones
+var notisTRexBadge = localStorage.getItem('notifications');
+if (notisTRexBadge !== undefined && notisTRexBadge !== null) {
+    notisTRexBadge = JSON.parse(notisTRexBadge);
+    if (notisTRexBadge.length > 0) {
+        chrome.browserAction.setBadgeText({
+            text: "" + notisTRexBadge.length
+        });
+        chrome.browserAction.setBadgeBackgroundColor({
+            color: '#1B5E20'
+        });
+    }
+}
+delete notisTRexBadge;
 
 function procesarTorrents(listaTorrents) {
     var torrent, metadata, aux, ultimaTemporada = 0, temporadas = [], temporadaUltimoCapitulo = [],

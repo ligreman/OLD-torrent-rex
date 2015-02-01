@@ -3,18 +3,24 @@
     <md-toolbar class="fixed">
         <div layout="row">
             <h2 class="md-toolbar-tools" flex="75">
-                <span class="negrita">Series en descarga</span>
+                <span class="negrita"><img src="images/white.png"
+                                           style="vertical-align: text-bottom; width: 24px; cursor:pointer"
+                                           ng-click="about($event)" /> Series en descarga</span>
             </h2>
 
             <md-switch ng-model="trexStatus" name="trexStatus" ng-change="changeTrexStatus()"
                        class="md-accent right" flex>
                 {{trexStatus?'Activo':'Inactivo'}}
+                <md-tooltip>
+                    Activar/Desactivar TRex
+                </md-tooltip>
             </md-switch>
         </div>
     </md-toolbar>
 
     <md-content class="header-spacing footer-spacing">
-        <md-card ng-repeat="serie in series">
+        <h3 class="center" ng-show="series.length == 0">Añade series para su descarga automática.</h3>
+        <md-card ng-repeat="serie in series track by serie.title">
             <div layout="row" ng-class="(serie.active)?'serie-enabled':'serie-disabled'">
                 <div flex="75">
                     <h3>{{serie.title}}</h3>
@@ -22,10 +28,20 @@
                 <md-switch ng-model="serie.active" name="serie.active" ng-change="updateSeries()"
                            class="md-accent right" aria-label="" flex>
                     {{serie.active?'Activo':'Inactivo'}}
+                    <md-tooltip>
+                        Activar/Desactivar serie
+                    </md-tooltip>
                 </md-switch>
             </div>
             <md-card-content>
-                <p>Último capítulo descargado: Temporada {{serie.lastSeason}} - Capítulo {{serie.lastChapter}}</p>
+                <div layout="row" layout-align="start center">
+                    <p flex="90">Último capítulo descargado: Temporada {{serie.lastSeason}} - Capítulo
+                        {{serie.lastChapter}}</p>
+                    <md-button class="md-primary" ng-click="removeSerie($event, serie.title)" aria-label="" flex>
+                        <md-icon icon="images/ic_remove_circle_outline_black_24dp.png"
+                                 style="width: 16px; height: 16px;"></md-icon>
+                    </md-button>
+                </div>
             </md-card-content>
         </md-card>
     </md-content>
@@ -36,6 +52,9 @@
         <div class="md-toolbar-tools md-toolbar-tools-bottom">
             <md-button class="md-primary md-fab md-fab-bottom-right" ng-click="goto('series')" aria-label="">
                 <md-icon icon="images/ic_add_white_24dp.png" style="width: 24px; height: 24px;"></md-icon>
+                <md-tooltip>
+                    Añadir serie
+                </md-tooltip>
             </md-button>
         </div>
     </md-toolbar>
