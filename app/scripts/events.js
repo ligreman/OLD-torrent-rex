@@ -23,44 +23,50 @@
  });
  */
 
-var utils = (function () {
-    return {
-        checkDownloads: (function () {
-            var status = (localStorage.getItem('trexStatus') === 'true'),
-                series, newTorrents = null, url, datos, lastSerie;
-            console.log("download");
-            //Si está activo TRex
-            if (status) {
-                //Cojo las series y miro una a una
-                series = JSON.parse(localStorage.getItem('series'));
+function checkDownloads() {
+    var status = (localStorage.getItem('trexStatus') === 'true'),
+        series, newTorrents = null, url, datos, lastSerie;
+    console.log("Empiezo chequeo de download");
+    //Si está activo TRex
+    if (status) {
+        //Cojo las series y miro una a una
+        series = JSON.parse(localStorage.getItem('series'));
 
-                if (series.length === 0) {
-                    return null;
-                }
+        if (series.length === 0) {
+            return null;
+        }
 
-                for (var i = 0; i < series.length; i++) {
-                    //Si no está activa esta serie me la salto
-                    if (!series[i].active) {
-                        continue;
-                    }
+        for (var i = 0; i < series.length; i++) {
+            console.log("miro la serie: " + series[i].title);
+            //Si no está activa esta serie me la salto
+            if (!series[i].active) {
+                console.log("No está activa");
+                continue;
+            }
 
-                    newTorrents = [];
-                    //Pido al ws la lista de torrents de la serie
-                    url = atob(series[i].url);
-                    $http.get('http://trex-lovehinaesp.rhcloud.com/api/tx/torrents/' + url).
-                        success(function (data) {
-                            console.log("he pedido al ws esto:");
-                            console.log(data);
-                            datos = procesarTorrents(data.torrents);
-                        });
+            newTorrents = [];
+            //Pido al ws la lista de torrents de la serie
+            url = atob(series[i].url);
+            var xmlhttp = new XMLHttpRequest();
+
+            xmlhttp.onreadystatechange = function () {
+                if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
+                    var data = JSON.parse(xmlhttp.responseText);
+                    console.log("he pedido al ws que me da esto:");
+                    console.log(data);
+                    datos = procesarTorrents(data.torrents);
+                    console.log("una vez procesado");
+                    console.log(datos);
 
                     //Comparo con los last de temporadas y capítulos descargados para saber si he de bajar algo nuevo
-                    for (var j = 0; j < datos.seasons; j++) {
+                    for (var j = 0; j < datos.seasons.length; j++) {
+                        console.log("Miro las temporadas: " + datos.seasons[j].season + '>=' + series[i].lastSeason);
                         //Si están en la temporada última que he descargado o más avanzado sigo
                         if (datos.seasons[j].season >= series[i].lastSeason) {
 
                             //Miro cada capítulo de esta temporada
-                            for (var k = 0; k < datos.seasons[j].chapters; k++) {
+                            for (var k = 0; k < datos.seasons[j].chapters.length; k++) {
+                                console.log("Miro los capis: " + datos.seasons[j].chapters[k].chapter + '>' + series[i].lastChapter);
                                 if (datos.seasons[j].chapters[k].chapter > series[i].lastChapter) {
 
                                     //Lo añado a la lista de descargas
@@ -68,7 +74,8 @@ var utils = (function () {
                                         id: datos.seasons[j].chapters[k].id,
                                         title: datos.seasons[j].chapters[k].title
                                     });
-
+                                    console.log("Actulizo new torrents");
+                                    console.log(newTorrents);
                                     //Actualizo la variable de series
                                     series[i].lastChapter = datos.seasons[j].chapters[k].chapter;
 
@@ -79,61 +86,79 @@ var utils = (function () {
                             series[i].lastSeason = datos.seasons[j].season;
                         }
                     }
-
                 }
+            };
+            xmlhttp.open("GET", 'http://trex-lovehinaesp.rhcloud.com/api/tx/torrents/' + series[i].url, false);
+            xmlhttp.send();
 
-                //Descargo lo nuevo
-                if (newTorrents !== null) {
-                    //Voy una a una bajando y generando notificación
-                    var notifications = JSON.parse(localStorage.getItem('notifications')),
-                        m = new Date();
-                    var dateString =
-                        ("0" + m.getUTCDate()).slice(-2) + "/" +
-                        ("0" + (m.getUTCMonth() + 1)).slice(-2) + "/" +
-                        m.getUTCFullYear() + " " +
-                        ("0" + m.getUTCHours()).slice(-2) + ":" +
-                        ("0" + m.getUTCMinutes()).slice(-2) + ":" +
-                        ("0" + m.getUTCSeconds()).slice(-2);
+            /*$http.get('http://trex-lovehinaesp.rhcloud.com/api/tx/torrents/' + url).
+             success(function (data) {
+             console.log("he pedido al ws esto:");
+             console.log(data);
+             datos = procesarTorrents(data.torrents);
+             console.log("me devuelve");
+             console.log(datos);
+             });*/
+        }
 
-                    for (i = 0; i < newTorrents.length; i++) {
-                        chrome.downloads.download({
-                            url: "http://txibitsoft.com/bajatorrent.php?id=" + newTorrents[i].id
-                        });
+        //Descargo lo nuevo
+        if (newTorrents !== null) {
+            console.log("Proceso New torrents");
+            //Voy una a una bajando y generando notificación
+            var notifications = JSON.parse(localStorage.getItem('notifications')),
+                m = new Date();
 
-                        notifications.push({
-                            text: newTorrents[i].title,
-                            date: dateString
-                        });
-                    }
-
-                    //Actualizo localstorage
-                    localStorage.setItem('series', JSON.stringify(series));
-                    localStorage.setItem('notifications', JSON.stringify(notifications));
-
-                    //Pongo numerito en el icono
-                    chrome.browserAction.setBadgeText({
-                        text: "" + notifications.length
-                    });
-                    chrome.browserAction.setBadgeBackgroundColor({
-                        color: '#1B5E20'
-                    });
-                }
+            if (notifications === undefined || notifications === null) {
+                notifications = [];
             }
-        }())
-    };
-}());
+
+            var dateString =
+                ("0" + m.getUTCDate()).slice(-2) + "/" +
+                ("0" + (m.getUTCMonth() + 1)).slice(-2) + "/" +
+                m.getUTCFullYear() + " " +
+                ("0" + m.getUTCHours()).slice(-2) + ":" +
+                ("0" + m.getUTCMinutes()).slice(-2) + ":" +
+                ("0" + m.getUTCSeconds()).slice(-2);
+
+            for (i = 0; i < newTorrents.length; i++) {
+                console.log("Torrent " + newTorrents[i].id);
+
+                chrome.downloads.download({
+                    url: "http://txibitsoft.com/bajatorrent.php?id=" + newTorrents[i].id
+                });
+
+                notifications.push({
+                    text: newTorrents[i].title,
+                    date: dateString
+                });
+            }
+
+            //Actualizo localstorage
+            localStorage.setItem('series', JSON.stringify(series));
+            localStorage.setItem('notifications', JSON.stringify(notifications));
+
+            //Pongo numerito en el icono
+            chrome.browserAction.setBadgeText({
+                text: "" + notifications.length
+            });
+            chrome.browserAction.setBadgeBackgroundColor({
+                color: '#1B5E20'
+            });
+        }
+    }
+}
 
 //Listener de cuando salta la alarma
 chrome.alarms.onAlarm.addListener(function (alarm) {
     console.log("suena: " + alarm.name);
     if (alarm.name === 'trex') {
         console.log("alarma suena");
-        utils.checkDownloads();
+        checkDownloads();
     }
 });
 
 //Al iniciar navegador compruebo (le doy un minuto)
-setTimeout(utils.checkDownloads, 60 * 1000);
+setTimeout(checkDownloads, 60 * 1000);
 
 
 function procesarTorrents(listaTorrents) {

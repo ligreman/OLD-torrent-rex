@@ -157,7 +157,7 @@ appControllers.controller('ChaptersCtrl', ['$scope', '$location', '$http', '$mdD
                         url: $scope.url,
                         language: $scope.info.language,
                         lastSeason: answer.fromTemporada,
-                        lastChapter: answer.fromEpisodio,
+                        lastChapter: answer.fromEpisodio - 1, //-1 porque así bajo el que me ha indicado el usuario
                         active: true
                     });
                     console.log("Meto");

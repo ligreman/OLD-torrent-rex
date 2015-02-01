@@ -23,9 +23,6 @@
                 templateUrl: 'views/chapters.html',
                 controller: 'ChaptersCtrl'
             }).
-            when('/about', {
-                templateUrl: 'views/about.html'
-            }).
             otherwise({
                 redirectTo: '/main'
             });
