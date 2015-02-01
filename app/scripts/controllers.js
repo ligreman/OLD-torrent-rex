@@ -143,9 +143,49 @@ appControllers.controller('ChaptersCtrl', ['$scope', '$location', '$http', '$mdD
             });
         };
 
+        //Auxiliar para borrar el storage
+        /*$scope.deleteStorage = function () {
+         localStorage.removeItem('series');
+         };*/
 
-        $scope.deleteStorage = function () {
-            localStorage.removeItem('series');
+        //Excluye un torrent de la descarga de esta serie (tiene que estar añadida antes)
+        $scope.excludeTorrent = function (id, ev) {
+            var seriesActuales = JSON.parse(localStorage.getItem('series')), error = false, encontrado = false;
+            console.log("excluyo");
+            if (seriesActuales !== undefined && seriesActuales !== null && seriesActuales.length > 0) {
+                //Busco la serie
+                console.log("busco serie");
+                for (var i = 0; i < seriesActuales.length; i++) {
+                    if (seriesActuales[i].title == $scope.title) {
+                        console.log("te encontre");
+                        //Esta es la serie, añado a la lista de exclusiones este torrent
+                        seriesActuales[i].excluded.push(id);
+                        encontrado = true;
+                        break;
+                    }
+                }
+
+                if (encontrado) {
+                    console.log("guardo");
+                    localStorage.setItem('series', JSON.stringify(seriesActuales));
+                    $scope.showSimpleToast('Episodio excluido.');
+                }
+            } else {
+                console.log("no tas");
+                error = true;
+            }
+            console.log("finalizando");
+            if (error || !encontrado) {
+                console.log("mensajito");
+                $mdDialog.show(
+                    $mdDialog.alert()
+                        .title('No se pudo excluir')
+                        .content('Antes de excluir un episodio has de añadir la serie a las descargas automáticas. Después ya puedes excluir manualmente los episodios que quieras.')
+                        .ariaLabel('')
+                        .ok('De acuerdo')
+                        .targetEvent(ev)
+                );
+            }
         };
 
         //Añadir una descarga - dialogo
@@ -171,55 +211,14 @@ appControllers.controller('ChaptersCtrl', ['$scope', '$location', '$http', '$mdD
                 templateUrl: 'views/templates/addDialog.tmpl.html',
                 targetEvent: ev
             }).then(function (answer) {
-                console.log("Voy a guardar " + answer);
-                //La añado a las ya existentes
-                var yaExiste = false,
-                    actualSeries = JSON.parse(localStorage.getItem('series'));
-
-                console.log("Tengo:");
-                console.log(actualSeries);
-
-                if (actualSeries === null || actualSeries === undefined) {
-                    actualSeries = [];
-                }
-
-                //Compruebo que la serie no esté ya añadida
-                for (var i = 0; i < actualSeries.length; i++) {
-                    console.log("A ver si esta ya existe: " + actualSeries[i].title)
-                    if (actualSeries[i].title == $scope.title) {
-                        console.log("Pozi");
-                        //Error serie ya existe
-                        $scope.showSimpleToast('La serie ya estaba descargándose.');
-                        yaExiste = true;
-                    }
-                }
-                console.log("Existia: " + yaExiste);
-                if (!yaExiste) {
-                    console.log("Amo a ver");
-                    //Inicializo si hace falta
-                    console.log("uyuyuyu");
-                    actualSeries.push({
-                        title: $scope.title,
-                        url: $scope.url,
-                        language: $scope.info.language,
-                        lastSeason: answer.fromTemporada,
-                        lastChapter: answer.fromEpisodio - 1, //-1 porque así bajo el que me ha indicado el usuario
-                        active: true
-                    });
-                    console.log("Meto");
-                    console.log(actualSeries);
-                    //Actualizo el storage
-                    chrome.storage.local.set({'series': actualSeries}, function () {
-                        //Todo ok
-                        $scope.showSimpleToast('Serie añadida correctamente.');
-                        console.log("TOOK");
-                        //Lanzo un chequeo de series
-                    });
-                    localStorage.setItem('series', JSON.stringify(actualSeries));
-                }
-                //});
+                addSerieDownload($scope, answer);
             }, function () {
             });
+        };
+
+        //Añadir directamente
+        $scope.addDirectly = function (answer) {
+            addSerieDownload($scope, answer);
         };
 
         //GoTo
@@ -244,6 +243,57 @@ function DialogController($scope, $mdDialog, paramService) {
     $scope.answer = function (answer) {
         $mdDialog.hide(answer);
     };
+}
+
+//Añade series a descarga
+function addSerieDownload($scope, answer) {
+    console.log("Voy a guardar " + answer);
+    //La añado a las ya existentes
+    var yaExiste = false,
+        actualSeries = JSON.parse(localStorage.getItem('series'));
+
+    console.log("Tengo:");
+    console.log(actualSeries);
+
+    if (actualSeries === null || actualSeries === undefined) {
+        actualSeries = [];
+    }
+
+    //Compruebo que la serie no esté ya añadida
+    for (var i = 0; i < actualSeries.length; i++) {
+        console.log("A ver si esta ya existe: " + actualSeries[i].title)
+        if (actualSeries[i].title == $scope.title) {
+            console.log("Pozi");
+            //Error serie ya existe
+            $scope.showSimpleToast('La serie ya estaba descargándose.');
+            yaExiste = true;
+        }
+    }
+    console.log("Existia: " + yaExiste);
+    if (!yaExiste) {
+        console.log("Amo a ver");
+        //Inicializo si hace falta
+        console.log("uyuyuyu");
+        actualSeries.push({
+            title: $scope.title,
+            url: $scope.url,
+            language: $scope.info.language,
+            lastSeason: answer.fromTemporada,
+            lastChapter: answer.fromEpisodio - 1, //-1 porque así bajo el que me ha indicado el usuario
+            excluded: [],
+            active: true
+        });
+        console.log("Meto");
+        console.log(actualSeries);
+        //Actualizo el storage
+        chrome.storage.local.set({'series': actualSeries}, function () {
+            //Todo ok
+            $scope.showSimpleToast('Serie añadida correctamente.');
+            console.log("TOOK");
+            //Lanzo un chequeo de series
+        });
+        localStorage.setItem('series', JSON.stringify(actualSeries));
+    }
 }
 
 function checkAlarms() {

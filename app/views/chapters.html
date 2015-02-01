@@ -46,7 +46,17 @@
                             <div flex>Tamaño: {{capi.size}} [{{capi.format}}]</div>
                         </div>
                         <p class="right">
-                            <md-button class="md-primary" ng-click="download(capi.id)">Torrent</md-button>
+                            <md-button class="md-warn" ng-click="excludeTorrent(capi.id, $event)" aria-label="">
+                                Excluir
+                                <md-tooltip>
+                                    Por si no pertenece a la serie
+                                </md-tooltip>
+                            </md-button>
+                            <md-button ng-click="download(capi.id)" aria-label="">Torrent</md-button>
+                            <md-button class="md-primary" aria-label=""
+                                       ng-click="addDirectly({fromTemporada:temporada.season, fromEpisodio:capi.chapter})">
+                                Añadir desde aquí
+                            </md-button>
                         </p>
                     </md-card-content>
                 </md-card>
