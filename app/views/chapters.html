@@ -2,7 +2,10 @@
 
     <md-toolbar class="fixed custom">
         <div layout="row">
-            <md-button ng-click="goto('series')">
+            <md-button ng-show="source=='series'" ng-click="goto('series')">
+                <md-icon icon="images/ic_arrow_back_white_24dp.png" style="width: 24px; height: 24px;"></md-icon>
+            </md-button>
+            <md-button ng-show="source=='main'" ng-click="goto('main')">
                 <md-icon icon="images/ic_arrow_back_white_24dp.png" style="width: 24px; height: 24px;"></md-icon>
             </md-button>
             <h2 class="md-toolbar-tools">
@@ -46,13 +49,15 @@
                             <div flex>Tamaño: {{capi.size}} [{{capi.format}}]</div>
                         </div>
                         <p class="right">
-                            <md-button class="md-warn" ng-show="isExcluded(capi.id)" ng-click="excludeTorrent(capi.id, $event)" aria-label="">
+                            <md-button class="md-warn" ng-hide="isExcluded(capi.id)"
+                                       ng-click="excludeTorrent(capi.id, $event)" aria-label="">
                                 Excluir
                                 <md-tooltip>
                                     Por si no pertenece a la serie
                                 </md-tooltip>
                             </md-button>
-                            <md-button class="md-accent" ng-hide="isExcluded(capi.id)" ng-click="desExcludeTorrent(capi.id)" aria-label="">
+                            <md-button class="md-accent" ng-show="isExcluded(capi.id)"
+                                       ng-click="desExcludeTorrent(capi.id)" aria-label="">
                                 Incluir
                                 <md-tooltip>
                                     Volver a incluir el episodio

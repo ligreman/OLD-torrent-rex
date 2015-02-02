@@ -1,28 +1,3 @@
-/*
- chrome.alarms.getAll(function (alarma) {
- console.log(alarma);
- });
-
- chrome.notifications.create('', {
- type: "list",
- title: "Patata2",
- message: "Mensajito",
- iconUrl: "images/ic_file_download_black_48dp.png",
- items: [
- {
- title: "uno",
- message: "msg1"
- },
- {
- title: "dos",
- message: "msg2"
- }
- ]
- }, function (nid) {
- console.log("Last error:", chrome.runtime.lastError);
- });
- */
-
 function checkDownloads() {
     var status = (localStorage.getItem('trexStatus') === 'true'),
         series, newTorrents = null, url, datos, lastSerie;

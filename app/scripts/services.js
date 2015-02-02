@@ -1,7 +1,7 @@
 var appServices = angular.module('appServices', []);
 
 appServices.service('paramService', function () {
-    var url = '', title = '',
+    var url = '', title = '', source = '',
         seasonLimits = {}, chapterLimits = {};
 
     var setUrl = function (newUrl) {
@@ -42,6 +42,14 @@ appServices.service('paramService', function () {
         return chapterLimits;
     };
 
+    var setSource = function (thissource) {
+        source = thissource;
+    };
+
+    var getSource = function () {
+        return source;
+    };
+
     return {
         setUrl: setUrl,
         getUrl: getUrl,
@@ -50,7 +58,9 @@ appServices.service('paramService', function () {
         setSeasonLimits: setSeasonLimits,
         getSeasonLimits: getSeasonLimits,
         setChapterLimits: setChapterLimits,
-        getChapterLimits: getChapterLimits
+        getChapterLimits: getChapterLimits,
+        setSource: setSource,
+        getSource: getSource
     };
 
 });

@@ -1,8 +1,8 @@
 var appControllers = angular.module('appControllers', []);
 
 //Controlador de la vista inicial
-appControllers.controller('MainCtrl', ['$scope', '$location', '$http', '$mdDialog',
-    function ($scope, $location, $http, $mdDialog) {
+appControllers.controller('MainCtrl', ['$scope', '$location', '$http', '$mdDialog', 'paramService',
+    function ($scope, $location, $http, $mdDialog, paramService) {
         $scope.series = JSON.parse(localStorage.getItem('series'));
         $scope.trexStatus = (localStorage.getItem('trexStatus') === 'true');
 
@@ -54,6 +54,14 @@ appControllers.controller('MainCtrl', ['$scope', '$location', '$http', '$mdDialo
         //Notificaciones
         checkNotifications();
 
+        //Go a una serie
+        $scope.goToSerie = function (url, name, quien) {
+            paramService.setUrl(url);
+            paramService.setTitle(name);
+            paramService.setSource(quien);
+            $location.path('/chapters');
+        };
+
         //GoTo
         $scope.goto = function (path) {
             $location.path('/' + path);
@@ -86,10 +94,11 @@ appControllers.controller('SeriesCtrl', ['$scope', '$location', '$http', 'paramS
             });
 
         //GoTo
-        $scope.goto = function (path, param, name) {
+        $scope.goto = function (path, param, name, source) {
             console.log("me voy de aqui " + param);
             paramService.setUrl(param);
             paramService.setTitle(name);
+            paramService.setSource(source);
             $location.path('/' + path);
         };
     }]);
@@ -108,7 +117,8 @@ appControllers.controller('ChaptersCtrl', ['$scope', '$location', '$http', '$mdD
         //URL y título de la serie. El título no tiene metainformación
         $scope.url = paramService.getUrl();
         $scope.title = paramService.getTitle();
-        console.log("He llegao: " + $scope.url);
+        $scope.source = paramService.getSource();
+        console.log("He llegao: " + $scope.url + " source " + $scope.source);
 
         //Toasts
         $scope.toastPosition = {bottom: true, top: false, left: false, right: true};
@@ -147,22 +157,20 @@ appControllers.controller('ChaptersCtrl', ['$scope', '$location', '$http', '$mdD
         /*$scope.deleteStorage = function () {
          localStorage.removeItem('series');
          };*/
-         
+
         //Comprueba si un torrent está excluido
-        $scope.isExcluded = function(id) {
-            var seriesActuales = JSON.parse(localStorage.getItem('series'));
+        $scope.isExcluded = function (id) {
+            var seriesActuales = JSON.parse(localStorage.getItem('series')), excluded = false;
             if (seriesActuales !== undefined && seriesActuales !== null && seriesActuales.length > 0) {
                 //Busco la serie
                 for (var i = 0; i < seriesActuales.length; i++) {
                     if (seriesActuales[i].title == $scope.title && seriesActuales[i].excluded.indexOf(id) !== -1) {
-                        //No está
-                        return false;
-                    } else {
-                        return true;
+                        excluded = true;
                     }
                 }
             }
-        }
+            return excluded;
+        };
 
         //Excluye un torrent de la descarga de esta serie (tiene que estar añadida antes)
         $scope.excludeTorrent = function (id, ev) {
@@ -203,7 +211,7 @@ appControllers.controller('ChaptersCtrl', ['$scope', '$location', '$http', '$mdD
                 );
             }
         };
-        
+
         //Incluye un torrent a las descargas, previamente exluido
         $scope.desExcludeTorrent = function (id, ev) {
             var seriesActuales = JSON.parse(localStorage.getItem('series')), error = false, encontrado = false;
@@ -226,7 +234,7 @@ appControllers.controller('ChaptersCtrl', ['$scope', '$location', '$http', '$mdD
                 console.log("no tas");
                 $scope.showSimpleToast('La serie no está en descarga actualmente.');
             }
-        }
+        };
 
         //Añadir una descarga - dialogo
         $scope.showAdd = function (ev) {

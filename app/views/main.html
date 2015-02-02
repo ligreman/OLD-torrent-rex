@@ -23,7 +23,11 @@
         <md-card ng-repeat="serie in series track by serie.title">
             <div layout="row" ng-class="(serie.active)?'serie-enabled':'serie-disabled'">
                 <div flex="75">
-                    <h3>{{serie.title}}</h3>
+                    <h3>
+                        <md-button class="minimal" aria-label="" ng-click="goToSerie(serie.url, serie.title, 'main')">
+                            {{serie.title}}
+                        </md-button>
+                    </h3>
                 </div>
                 <md-switch ng-model="serie.active" name="serie.active" ng-change="updateSeries()"
                            class="md-accent right" aria-label="" flex>
@@ -35,11 +39,14 @@
             </div>
             <md-card-content>
                 <div layout="row" layout-align="start center">
-                    <p flex="90">Último capítulo descargado: Temporada {{serie.lastSeason}} - Capítulo
-                        {{serie.lastChapter}}</p>
+                    <div flex="90">
+                        <p>Último capítulo descargado: Temporada {{serie.lastSeason}} - Capítulo
+                            {{serie.lastChapter}}</p>
+                        <p ng-show="serie.excluded.length>0">Exclusiones: {{serie.excluded.length}}</p>
+                    </div>
                     <md-button class="md-primary" ng-click="removeSerie($event, serie.title)" aria-label="" flex>
-                        <md-icon icon="images/ic_remove_circle_outline_black_24dp.png"
-                                 style="width: 16px; height: 16px;"></md-icon>
+                        <md-icon icon="images/ic_highlight_remove_black_24dp.png"
+                                 style="width: 24px; height: 24px;"></md-icon>
                     </md-button>
                 </div>
             </md-card-content>
