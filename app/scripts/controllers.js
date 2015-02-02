@@ -147,6 +147,22 @@ appControllers.controller('ChaptersCtrl', ['$scope', '$location', '$http', '$mdD
         /*$scope.deleteStorage = function () {
          localStorage.removeItem('series');
          };*/
+         
+        //Comprueba si un torrent está excluido
+        $scope.isExcluded = function(id) {
+            var seriesActuales = JSON.parse(localStorage.getItem('series'));
+            if (seriesActuales !== undefined && seriesActuales !== null && seriesActuales.length > 0) {
+                //Busco la serie
+                for (var i = 0; i < seriesActuales.length; i++) {
+                    if (seriesActuales[i].title == $scope.title && seriesActuales[i].excluded.indexOf(id) !== -1) {
+                        //No está
+                        return false;
+                    } else {
+                        return true;
+                    }
+                }
+            }
+        }
 
         //Excluye un torrent de la descarga de esta serie (tiene que estar añadida antes)
         $scope.excludeTorrent = function (id, ev) {
