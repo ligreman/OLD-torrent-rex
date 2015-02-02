@@ -203,6 +203,30 @@ appControllers.controller('ChaptersCtrl', ['$scope', '$location', '$http', '$mdD
                 );
             }
         };
+        
+        //Incluye un torrent a las descargas, previamente exluido
+        $scope.desExcludeTorrent = function (id, ev) {
+            var seriesActuales = JSON.parse(localStorage.getItem('series')), error = false, encontrado = false;
+            console.log("incluyo");
+            if (seriesActuales !== undefined && seriesActuales !== null && seriesActuales.length > 0) {
+                //Busco la serie
+                console.log("busco serie");
+                for (var i = 0; i < seriesActuales.length; i++) {
+                    if (seriesActuales[i].title == $scope.title) {
+                        console.log("te encontre");
+                        //Esta es la serie, añado a la lista de exclusiones este torrent
+                        var index = seriesActuales[i].excluded.indexOf(id);
+                        seriesActuales[i].excluded.splice(index, 1);
+                        localStorage.setItem('series', JSON.stringify(seriesActuales));
+                        $scope.showSimpleToast('Episodio incluido de nuevo.');
+                        break;
+                    }
+                }
+            } else {
+                console.log("no tas");
+                $scope.showSimpleToast('La serie no está en descarga actualmente.');
+            }
+        }
 
         //Añadir una descarga - dialogo
         $scope.showAdd = function (ev) {
