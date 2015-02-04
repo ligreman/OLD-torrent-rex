@@ -29,6 +29,11 @@ html p, body p {
     text-align: right;
 }
 
+.enlace {
+    cursor: pointer;
+    color: #304FFE;
+}
+
 .ptop10 {
     padding-top: 10px;
 }

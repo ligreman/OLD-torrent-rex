@@ -154,10 +154,31 @@ function procesarTorrents(listaTorrents) {
     var torrent, metadata, aux, ultimaTemporada = 0, temporadas = [], temporadaUltimoCapitulo = [],
         temps = [], chaps = [], idiomaGeneral = '';
 
+    //Saco los excluidos
+    var seriesActuales = JSON.parse(localStorage.getItem('series')), excluded = [];
+    if (seriesActuales !== undefined && seriesActuales !== null && seriesActuales.length > 0) {
+        //Busco la serie
+        for (var i = 0; i < seriesActuales.length; i++) {
+            for (var key in seriesActuales[i].excluded) {
+                if (seriesActuales[i].excluded.hasOwnProperty(key)) {
+                    excluded.push(key);
+                }
+            }
+        }
+    }
+    console.log("Excludios: ");
+    console.log(excluded);
+
     //Recorro los torrents y voy extrayendo su metainformación
     for (var key in listaTorrents) {
         if (listaTorrents.hasOwnProperty(key)) {
             torrent = listaTorrents[key];
+
+            //Miro a ver si está excluido
+            if (excluded.indexOf(torrent.id) !== -1) {
+                continue;
+            }
+
             metadata = extractMetaInfo(torrent.title);
 
             if (metadata !== null) {

@@ -37,12 +37,13 @@
                     </md-tooltip>
                 </md-switch>
             </div>
-            <md-card-content>
+            <md-card-content ng-init="cuantos = countExcluded(serie.excluded)">
                 <div layout="row" layout-align="start center">
                     <div flex="90">
                         <p>Último capítulo descargado: Temporada {{serie.lastSeason}} - Capítulo
                             {{serie.lastChapter}}</p>
-                        <p ng-show="serie.excluded.length>0">Exclusiones: {{serie.excluded.length}}</p>
+                        <p ng-show="cuantos>0" class="enlace"
+                           ng-click="showExclusions($event, serie.title)">Exclusiones: {{cuantos}}</p>
                     </div>
                     <md-button class="md-primary" ng-click="removeSerie($event, serie.title)" aria-label="" flex>
                         <md-icon icon="images/ic_highlight_remove_black_24dp.png"

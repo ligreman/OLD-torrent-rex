@@ -1,8 +1,8 @@
 var appControllers = angular.module('appControllers', []);
 
 //Controlador de la vista inicial
-appControllers.controller('MainCtrl', ['$scope', '$location', '$http', '$mdDialog', 'paramService',
-    function ($scope, $location, $http, $mdDialog, paramService) {
+appControllers.controller('MainCtrl', ['$scope', '$route', '$location', '$http', '$mdDialog', 'paramService',
+    function ($scope, $route, $location, $http, $mdDialog, paramService) {
         $scope.series = JSON.parse(localStorage.getItem('series'));
         $scope.trexStatus = (localStorage.getItem('trexStatus') === 'true');
 
@@ -65,6 +65,36 @@ appControllers.controller('MainCtrl', ['$scope', '$location', '$http', '$mdDialo
         //GoTo
         $scope.goto = function (path) {
             $location.path('/' + path);
+        };
+
+        //Exclusiones
+        $scope.showExclusions = function (ev, serie) {
+            var auxSeries = $scope.series;
+            console.log(serie);
+
+            for (var i = 0; i < auxSeries.length; i++) {
+                if (auxSeries[i].title == serie) {
+                    console.log("tencontre");
+                    paramService.setExclusionInfo(auxSeries[i].excluded);
+                    paramService.setTitle(auxSeries[i].title);
+                    $mdDialog.show({
+                        controller: ExcludeDialogController,
+                        templateUrl: 'views/templates/excludeDialog.tmpl.html',
+                        targetEvent: ev
+                    }).then(function (answer) {
+                        if (answer > 0) {
+                            console.log("sdfsda");
+                            $route.reload();
+                        }
+                    }, function () {
+                    });
+                }
+            }
+        };
+
+        //Contar exclusiones
+        $scope.countExcluded = function (exclusions) {
+            return Object.keys(exclusions).length;
         };
 
         //About
@@ -164,7 +194,7 @@ appControllers.controller('ChaptersCtrl', ['$scope', '$location', '$http', '$mdD
             if (seriesActuales !== undefined && seriesActuales !== null && seriesActuales.length > 0) {
                 //Busco la serie
                 for (var i = 0; i < seriesActuales.length; i++) {
-                    if (seriesActuales[i].title == $scope.title && seriesActuales[i].excluded.indexOf(id) !== -1) {
+                    if (seriesActuales[i].title == $scope.title && seriesActuales[i].excluded[id] !== undefined) {
                         excluded = true;
                     }
                 }
@@ -173,7 +203,7 @@ appControllers.controller('ChaptersCtrl', ['$scope', '$location', '$http', '$mdD
         };
 
         //Excluye un torrent de la descarga de esta serie (tiene que estar añadida antes)
-        $scope.excludeTorrent = function (id, ev) {
+        $scope.excludeTorrent = function (id, capiTitle, ev) {
             var seriesActuales = JSON.parse(localStorage.getItem('series')), error = false, encontrado = false;
             console.log("excluyo");
             if (seriesActuales !== undefined && seriesActuales !== null && seriesActuales.length > 0) {
@@ -183,7 +213,7 @@ appControllers.controller('ChaptersCtrl', ['$scope', '$location', '$http', '$mdD
                     if (seriesActuales[i].title == $scope.title) {
                         console.log("te encontre");
                         //Esta es la serie, añado a la lista de exclusiones este torrent
-                        seriesActuales[i].excluded.push(id);
+                        seriesActuales[i].excluded[id] = {title: capiTitle, torrentId: id};
                         encontrado = true;
                         break;
                     }
@@ -214,26 +244,7 @@ appControllers.controller('ChaptersCtrl', ['$scope', '$location', '$http', '$mdD
 
         //Incluye un torrent a las descargas, previamente exluido
         $scope.desExcludeTorrent = function (id, ev) {
-            var seriesActuales = JSON.parse(localStorage.getItem('series')), error = false, encontrado = false;
-            console.log("incluyo");
-            if (seriesActuales !== undefined && seriesActuales !== null && seriesActuales.length > 0) {
-                //Busco la serie
-                console.log("busco serie");
-                for (var i = 0; i < seriesActuales.length; i++) {
-                    if (seriesActuales[i].title == $scope.title) {
-                        console.log("te encontre");
-                        //Esta es la serie, añado a la lista de exclusiones este torrent
-                        var index = seriesActuales[i].excluded.indexOf(id);
-                        seriesActuales[i].excluded.splice(index, 1);
-                        localStorage.setItem('series', JSON.stringify(seriesActuales));
-                        $scope.showSimpleToast('Episodio incluido de nuevo.');
-                        break;
-                    }
-                }
-            } else {
-                console.log("no tas");
-                $scope.showSimpleToast('La serie no está en descarga actualmente.');
-            }
+            desexcluir($scope, id, true);
         };
 
         //Añadir una descarga - dialogo
@@ -293,6 +304,28 @@ function DialogController($scope, $mdDialog, paramService) {
     };
 }
 
+function ExcludeDialogController($scope, $mdDialog, paramService) {
+    $scope.exclusions = paramService.getExclusionInfo();
+    $scope.title = paramService.getTitle();
+    $scope.cambios = 0;
+
+    console.log($scope.exclusions);
+    $scope.hide = function () {
+        $mdDialog.hide();
+    };
+    $scope.ok = function () {
+        $mdDialog.hide($scope.cambios);
+    };
+
+    $scope.incluir = function (id) {
+        desexcluir($scope, id, false);
+        if ($scope.exclusions[id] !== undefined) {
+            $scope.cambios++;
+            delete $scope.exclusions[id];
+        }
+    };
+}
+
 //Añade series a descarga
 function addSerieDownload($scope, answer) {
     console.log("Voy a guardar " + answer);
@@ -309,7 +342,7 @@ function addSerieDownload($scope, answer) {
 
     //Compruebo que la serie no esté ya añadida
     for (var i = 0; i < actualSeries.length; i++) {
-        console.log("A ver si esta ya existe: " + actualSeries[i].title)
+        console.log("A ver si esta ya existe: " + actualSeries[i].title);
         if (actualSeries[i].title == $scope.title) {
             console.log("Pozi");
             //Error serie ya existe
@@ -328,7 +361,7 @@ function addSerieDownload($scope, answer) {
             language: $scope.info.language,
             lastSeason: answer.fromTemporada,
             lastChapter: answer.fromEpisodio - 1, //-1 porque así bajo el que me ha indicado el usuario
-            excluded: [],
+            excluded: {},
             active: true
         });
         console.log("Meto");
@@ -383,5 +416,36 @@ function checkNotifications() {
         chrome.browserAction.setBadgeText({
             text: ""
         });
+    }
+}
+
+function desexcluir($scope, id, showMsg) {
+    var seriesActuales = JSON.parse(localStorage.getItem('series')), error = false, encontrado = false;
+    console.log("incluyo");
+    if (seriesActuales !== undefined && seriesActuales !== null && seriesActuales.length > 0) {
+        //Busco la serie
+        console.log("busco serie");
+        for (var i = 0; i < seriesActuales.length; i++) {
+            if (seriesActuales[i].title == $scope.title) {
+                console.log("te encontre");
+                //Esta es la serie, añado a la lista de exclusiones este torrent
+                if (seriesActuales[i].excluded[id] !== undefined) {
+                    delete seriesActuales[i].excluded[id];
+                }
+
+                //var index = seriesActuales[i].excluded.indexOf(id);
+                //seriesActuales[i].excluded.splice(index, 1);
+                localStorage.setItem('series', JSON.stringify(seriesActuales));
+                if (showMsg) {
+                    $scope.showSimpleToast('Episodio incluido de nuevo.');
+                }
+                break;
+            }
+        }
+    } else {
+        console.log("no tas");
+        if (showMsg) {
+            $scope.showSimpleToast('La serie no está en descarga actualmente.');
+        }
     }
 }

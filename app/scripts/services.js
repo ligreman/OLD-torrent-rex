@@ -1,7 +1,7 @@
 var appServices = angular.module('appServices', []);
 
 appServices.service('paramService', function () {
-    var url = '', title = '', source = '',
+    var url = '', title = '', source = '', exclusionInfo,
         seasonLimits = {}, chapterLimits = {};
 
     var setUrl = function (newUrl) {
@@ -50,6 +50,14 @@ appServices.service('paramService', function () {
         return source;
     };
 
+    var setExclusionInfo = function (info) {
+        exclusionInfo = info;
+    };
+
+    var getExclusionInfo = function () {
+        return exclusionInfo;
+    };
+
     return {
         setUrl: setUrl,
         getUrl: getUrl,
@@ -60,7 +68,9 @@ appServices.service('paramService', function () {
         setChapterLimits: setChapterLimits,
         getChapterLimits: getChapterLimits,
         setSource: setSource,
-        getSource: getSource
+        getSource: getSource,
+        setExclusionInfo: setExclusionInfo,
+        getExclusionInfo: getExclusionInfo
     };
 
 });
@@ -70,10 +80,31 @@ appServices.service('torrentService', function () {
         var torrent, metadata, aux, ultimaTemporada = 0, temporadas = [], temporadaUltimoCapitulo = [],
             temps = [], chaps = [], idiomaGeneral = '';
 
+        //Saco los excluidos
+        var seriesActuales = JSON.parse(localStorage.getItem('series')), excluded = [];
+        if (seriesActuales !== undefined && seriesActuales !== null && seriesActuales.length > 0) {
+            //Busco la serie
+            for (var i = 0; i < seriesActuales.length; i++) {
+                for (var key in seriesActuales[i].excluded) {
+                    if (seriesActuales[i].excluded.hasOwnProperty(key)) {
+                        excluded.push(key);
+                    }
+                }
+            }
+        }
+        console.log("Excludios: ");
+        console.log(excluded);
+
         //Recorro los torrents y voy extrayendo su metainformación
         for (var key in listaTorrents) {
             if (listaTorrents.hasOwnProperty(key)) {
                 torrent = listaTorrents[key];
+
+                //Miro a ver si está excluido
+                if (excluded.indexOf(torrent.id) !== -1) {
+                    continue;
+                }
+
                 metadata = extractMetaInfo(torrent.title);
 
                 if (metadata !== null) {
@@ -115,7 +146,6 @@ appServices.service('torrentService', function () {
             }
         }
 
-
         for (var kk in temporadas) {
             chaps = [];
 
@@ -156,7 +186,7 @@ function extractMetaInfo(torrentTitle) {
     var temporada = null, capitulo = null, formato = null, idioma = null;
 
     //La temporada
-    var aux = torrentTitle.match(/Temporada ./gi);
+    var aux = torrentTitle.match(/Temporada [0-9]{1,2}/gi);
     if (aux !== undefined && aux !== null && aux !== '') {
         aux = aux[0];
         aux = aux.split(' ');
@@ -169,12 +199,21 @@ function extractMetaInfo(torrentTitle) {
     }
 
     //El capitulo
-    aux = torrentTitle.match(/Cap\..../gi);
+    aux = torrentTitle.match(/Cap\.[0-9]{3,4}/gi);
     if (aux !== undefined && aux !== null && aux !== '') {
         aux = aux[0];
+        aux = aux.replace('Cap.', '');
+
         //Verifico la temporada, por si antes no la pude sacar
         if (temporada === null) {
-            var auxTemp = aux.charAt(aux.length - 3); //de Cap.103 es el 1
+            var auxTemp;
+
+            if (aux.length === 3) {
+                auxTemp = aux.charAt(aux.length - 3); //de Cap.103 es el 1
+            } else if (aux.length === 4) {
+                auxTemp = '' + aux.charAt(aux.length - 4) + aux.charAt(aux.length - 3); //de Cap.1103 es el 11
+            }
+
             auxTemp = parseInt(auxTemp);
             if (!isNaN(auxTemp)) {
                 temporada = auxTemp;
