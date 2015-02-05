@@ -164,3 +164,7 @@ md-dialog p {
     padding: 0;
     font-weight: bold;
 }
+
+md-backdrop.md-opaque.md-default-theme, .md-dialog-container {
+    position: fixed;
+}

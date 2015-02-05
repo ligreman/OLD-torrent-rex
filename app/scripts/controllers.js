@@ -449,3 +449,24 @@ function desexcluir($scope, id, showMsg) {
         }
     }
 }
+
+//*****************************************************************//
+
+//Controlador de la vista de Películas
+appControllers.controller('MoviesCtrl', ['$scope', '$location', '$http',
+    function ($scope, $location, $http) {
+        $scope.loading = true;
+
+        //Consulto el WS para obtener las categorías
+        $http.get('http://trex-lovehinaesp.rhcloud.com/api/tx/movies').
+            success(function (data) {
+                console.log(data);
+                $scope.movies = data.categories;
+                $scope.loading = false;
+            });
+
+        //GoTo
+        $scope.goto = function (path) {            
+            $location.path('/' + path);
+        };
+    }]);

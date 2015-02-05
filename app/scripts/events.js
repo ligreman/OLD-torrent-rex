@@ -169,6 +169,7 @@ function procesarTorrents(listaTorrents) {
     console.log("Excludios: ");
     console.log(excluded);
 
+//http://www.txibitsoft.com/torrents.php?procesar=1&texto=patata&chkdescripcion=&chkfecha=&txtfecha=05/02/2015&txtfecha2=05/02/2015&categorias=%27Cine%20Alta%20Definicion%20HD%27,%27Peliculas%27,%27Peliculas%20Castellano%27
     //Recorro los torrents y voy extrayendo su metainformación
     for (var key in listaTorrents) {
         if (listaTorrents.hasOwnProperty(key)) {

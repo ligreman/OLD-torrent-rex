@@ -1,4 +1,4 @@
-﻿var myApp = angular.module('TorrentRex', [
+var myApp = angular.module('TorrentRex', [
     'appControllers',
     'appServices',
     'ngRoute',
@@ -22,6 +22,10 @@
             when('/chapters', {
                 templateUrl: 'views/chapters.html',
                 controller: 'ChaptersCtrl'
+            }).
+            when('/movies', {
+                templateUrl: 'views/movies.html',
+                controller: 'MoviesCtrl'
             }).
             otherwise({
                 redirectTo: '/main'
