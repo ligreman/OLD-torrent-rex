@@ -23,9 +23,9 @@ var myApp = angular.module('TorrentRex', [
                 templateUrl: 'views/chapters.html',
                 controller: 'ChaptersCtrl'
             }).
-            when('/movies', {
-                templateUrl: 'views/movies.html',
-                controller: 'MoviesCtrl'
+            when('/torrents', {
+                templateUrl: 'views/torrents.html',
+                controller: 'TorrentsCtrl'
             }).
             otherwise({
                 redirectTo: '/main'

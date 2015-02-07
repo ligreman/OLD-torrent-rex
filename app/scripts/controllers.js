@@ -32,7 +32,6 @@ appControllers.controller('MainCtrl', ['$scope', '$route', '$location', '$http',
                 .cancel('Cancelar')
                 .targetEvent(ev);
             $mdDialog.show(confirm).then(function () {
-                console.log("A eliminar " + serieTitle);
                 var auxSeries = JSON.parse(localStorage.getItem('series'));
 
                 for (var i = 0; i < auxSeries.length; i++) {
@@ -70,11 +69,9 @@ appControllers.controller('MainCtrl', ['$scope', '$route', '$location', '$http',
         //Exclusiones
         $scope.showExclusions = function (ev, serie) {
             var auxSeries = $scope.series;
-            console.log(serie);
 
             for (var i = 0; i < auxSeries.length; i++) {
                 if (auxSeries[i].title == serie) {
-                    console.log("tencontre");
                     paramService.setExclusionInfo(auxSeries[i].excluded);
                     paramService.setTitle(auxSeries[i].title);
                     $mdDialog.show({
@@ -83,7 +80,6 @@ appControllers.controller('MainCtrl', ['$scope', '$route', '$location', '$http',
                         targetEvent: ev
                     }).then(function (answer) {
                         if (answer > 0) {
-                            console.log("sdfsda");
                             $route.reload();
                         }
                     }, function () {
@@ -118,14 +114,12 @@ appControllers.controller('SeriesCtrl', ['$scope', '$location', '$http', 'paramS
         //Consulto el WS para obtener las categorías
         $http.get('http://trex-lovehinaesp.rhcloud.com/api/tx/categories').
             success(function (data) {
-                console.log(data);
                 $scope.categories = data.categories;
                 $scope.loading = false;
             });
 
         //GoTo
         $scope.goto = function (path, param, name, source) {
-            console.log("me voy de aqui " + param);
             paramService.setUrl(param);
             paramService.setTitle(name);
             paramService.setSource(source);
@@ -148,7 +142,6 @@ appControllers.controller('ChaptersCtrl', ['$scope', '$location', '$http', '$mdD
         $scope.url = paramService.getUrl();
         $scope.title = paramService.getTitle();
         $scope.source = paramService.getSource();
-        console.log("He llegao: " + $scope.url + " source " + $scope.source);
 
         //Toasts
         $scope.toastPosition = {bottom: true, top: false, left: false, right: true};
@@ -169,7 +162,6 @@ appControllers.controller('ChaptersCtrl', ['$scope', '$location', '$http', '$mdD
         //Petición de los torrents
         $http.get('http://trex-lovehinaesp.rhcloud.com/api/tx/torrents/' + $scope.url).
             success(function (data) {
-                console.log(data);
                 $scope.loading = false;
 
                 $scope.info = torrentService.processTorrents(data.torrents);
@@ -177,7 +169,6 @@ appControllers.controller('ChaptersCtrl', ['$scope', '$location', '$http', '$mdD
 
         //Descarga de un torrent
         $scope.download = function (torrentId) {
-            console.log("ID: " + torrentId);
             chrome.downloads.download({
                 url: "http://txibitsoft.com/bajatorrent.php?id=" + torrentId
             });
@@ -205,13 +196,11 @@ appControllers.controller('ChaptersCtrl', ['$scope', '$location', '$http', '$mdD
         //Excluye un torrent de la descarga de esta serie (tiene que estar añadida antes)
         $scope.excludeTorrent = function (id, capiTitle, ev) {
             var seriesActuales = JSON.parse(localStorage.getItem('series')), error = false, encontrado = false;
-            console.log("excluyo");
+
             if (seriesActuales !== undefined && seriesActuales !== null && seriesActuales.length > 0) {
                 //Busco la serie
-                console.log("busco serie");
                 for (var i = 0; i < seriesActuales.length; i++) {
                     if (seriesActuales[i].title == $scope.title) {
-                        console.log("te encontre");
                         //Esta es la serie, añado a la lista de exclusiones este torrent
                         seriesActuales[i].excluded[id] = {title: capiTitle, torrentId: id};
                         encontrado = true;
@@ -220,17 +209,14 @@ appControllers.controller('ChaptersCtrl', ['$scope', '$location', '$http', '$mdD
                 }
 
                 if (encontrado) {
-                    console.log("guardo");
                     localStorage.setItem('series', JSON.stringify(seriesActuales));
                     $scope.showSimpleToast('Episodio excluido.');
                 }
             } else {
-                console.log("no tas");
                 error = true;
             }
-            console.log("finalizando");
+
             if (error || !encontrado) {
-                console.log("mensajito");
                 $mdDialog.show(
                     $mdDialog.alert()
                         .title('No se pudo excluir')
@@ -309,7 +295,6 @@ function ExcludeDialogController($scope, $mdDialog, paramService) {
     $scope.title = paramService.getTitle();
     $scope.cambios = 0;
 
-    console.log($scope.exclusions);
     $scope.hide = function () {
         $mdDialog.hide();
     };
@@ -328,13 +313,9 @@ function ExcludeDialogController($scope, $mdDialog, paramService) {
 
 //Añade series a descarga
 function addSerieDownload($scope, answer) {
-    console.log("Voy a guardar " + answer);
     //La añado a las ya existentes
     var yaExiste = false,
         actualSeries = JSON.parse(localStorage.getItem('series'));
-
-    console.log("Tengo:");
-    console.log(actualSeries);
 
     if (actualSeries === null || actualSeries === undefined) {
         actualSeries = [];
@@ -342,19 +323,14 @@ function addSerieDownload($scope, answer) {
 
     //Compruebo que la serie no esté ya añadida
     for (var i = 0; i < actualSeries.length; i++) {
-        console.log("A ver si esta ya existe: " + actualSeries[i].title);
         if (actualSeries[i].title == $scope.title) {
-            console.log("Pozi");
             //Error serie ya existe
             $scope.showSimpleToast('La serie ya estaba descargándose.');
             yaExiste = true;
         }
     }
-    console.log("Existia: " + yaExiste);
     if (!yaExiste) {
-        console.log("Amo a ver");
         //Inicializo si hace falta
-        console.log("uyuyuyu");
         actualSeries.push({
             title: $scope.title,
             url: $scope.url,
@@ -364,21 +340,17 @@ function addSerieDownload($scope, answer) {
             excluded: {},
             active: true
         });
-        console.log("Meto");
-        console.log(actualSeries);
+
         //Actualizo el storage
         chrome.storage.local.set({'series': actualSeries}, function () {
             //Todo ok
             $scope.showSimpleToast('Serie añadida correctamente.');
-            console.log("TOOK");
-            //Lanzo un chequeo de series
         });
         localStorage.setItem('series', JSON.stringify(actualSeries));
     }
 }
 
 function checkAlarms() {
-    console.log("alarm");
     var status = (localStorage.getItem('trexStatus') === 'true'),
         alarma;
 
@@ -388,11 +360,9 @@ function checkAlarms() {
             delayInMinutes: 1,
             periodInMinutes: 1
         });
-        console.log("alarma creada");
     } else {
         //Desactivo alarmas
         chrome.alarms.clear('trex');
-        console.log("alarma desactivada");
     }
 }
 
@@ -421,13 +391,10 @@ function checkNotifications() {
 
 function desexcluir($scope, id, showMsg) {
     var seriesActuales = JSON.parse(localStorage.getItem('series')), error = false, encontrado = false;
-    console.log("incluyo");
     if (seriesActuales !== undefined && seriesActuales !== null && seriesActuales.length > 0) {
         //Busco la serie
-        console.log("busco serie");
         for (var i = 0; i < seriesActuales.length; i++) {
             if (seriesActuales[i].title == $scope.title) {
-                console.log("te encontre");
                 //Esta es la serie, añado a la lista de exclusiones este torrent
                 if (seriesActuales[i].excluded[id] !== undefined) {
                     delete seriesActuales[i].excluded[id];
@@ -443,7 +410,6 @@ function desexcluir($scope, id, showMsg) {
             }
         }
     } else {
-        console.log("no tas");
         if (showMsg) {
             $scope.showSimpleToast('La serie no está en descarga actualmente.');
         }
@@ -452,21 +418,39 @@ function desexcluir($scope, id, showMsg) {
 
 //*****************************************************************//
 
-//Controlador de la vista de Películas
-appControllers.controller('MoviesCtrl', ['$scope', '$location', '$http',
+//Controlador de la vista de buscar torrents
+appControllers.controller('TorrentsCtrl', ['$scope', '$location', '$http',
     function ($scope, $location, $http) {
-        $scope.loading = true;
+        $scope.loading = false;
+        $scope.currentPage = 0;
+        $scope.maxPages = 0;
+        $scope.searchTerm = '';
 
-        //Consulto el WS para obtener las categorías
-        $http.get('http://trex-lovehinaesp.rhcloud.com/api/tx/movies').
-            success(function (data) {
-                console.log(data);
-                $scope.movies = data.categories;
-                $scope.loading = false;
+        $scope.search = function (term, page) {
+            $scope.loading = true;
+            $scope.currentPage = 0;
+            $scope.maxPages = 0;
+
+            //Consulto el WS para obtener las categorías
+            $http.get('http://trex-lovehinaesp.rhcloud.com/api/tx/search/' + btoa(term) + '/' + page).
+                success(function (data) {
+                    $scope.torrents = data.torrents;
+                    $scope.loading = false;
+
+                    $scope.maxPages = data.maxPages;
+                    $scope.currentPage = page;
+                });
+        };
+
+        //Descarga de un torrent
+        $scope.download = function (torrentId) {
+            chrome.downloads.download({
+                url: "http://txibitsoft.com/bajatorrent.php?id=" + torrentId
             });
+        };
 
         //GoTo
-        $scope.goto = function (path) {            
+        $scope.goto = function (path) {
             $location.path('/' + path);
         };
     }]);

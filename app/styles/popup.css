@@ -38,6 +38,11 @@ html p, body p {
     padding-top: 10px;
 }
 
+.lrpad10 {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
 .fixed {
     position: fixed;
 }
@@ -104,13 +109,18 @@ md-progress-circular.center {
 .destacado {
     display: flex;
     align-items: center;
-    justify-content: center;
     height: 50px;
     background-color: #BC9EFF;
 }
 
+.destacado.center {
+    justify-content: center;
+}
+
 .destacado h3 {
     margin: 0;
+    padding-left: 5px;
+    padding-right: 5px;
 }
 
 .md-card-content p {

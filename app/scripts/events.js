@@ -1,7 +1,7 @@
 function checkDownloads() {
     var status = (localStorage.getItem('trexStatus') === 'true'),
         series, newTorrents = null, url, datos, lastSerie;
-    console.log("Empiezo chequeo de download");
+
     //Si está activo TRex
     if (status) {
         //Cojo las series y miro una a una
@@ -12,10 +12,8 @@ function checkDownloads() {
         }
 
         for (var i = 0; i < series.length; i++) {
-            console.log("miro la serie: " + series[i].title);
             //Si no está activa esta serie me la salto
             if (!series[i].active) {
-                console.log("No está activa");
                 continue;
             }
 
@@ -27,21 +25,15 @@ function checkDownloads() {
             xmlhttp.onreadystatechange = function () {
                 if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
                     var data = JSON.parse(xmlhttp.responseText);
-                    console.log("he pedido al ws que me da esto:");
-                    console.log(data);
                     datos = procesarTorrents(data.torrents);
-                    console.log("una vez procesado");
-                    console.log(datos);
 
                     //Comparo con los last de temporadas y capítulos descargados para saber si he de bajar algo nuevo
                     for (var j = 0; j < datos.seasons.length; j++) {
-                        console.log("Miro las temporadas: " + datos.seasons[j].season + '>=' + series[i].lastSeason);
                         //Si están en la temporada última que he descargado o más avanzado sigo
                         if (datos.seasons[j].season >= series[i].lastSeason) {
 
                             //Miro cada capítulo de esta temporada
                             for (var k = 0; k < datos.seasons[j].chapters.length; k++) {
-                                console.log("Miro los capis: " + datos.seasons[j].chapters[k].chapter + '>' + series[i].lastChapter);
                                 if (datos.seasons[j].chapters[k].chapter > series[i].lastChapter) {
 
                                     //Lo añado a la lista de descargas
@@ -49,8 +41,7 @@ function checkDownloads() {
                                         id: datos.seasons[j].chapters[k].id,
                                         title: datos.seasons[j].chapters[k].title
                                     });
-                                    console.log("Actulizo new torrents");
-                                    console.log(newTorrents);
+
                                     //Actualizo la variable de series
                                     series[i].lastChapter = datos.seasons[j].chapters[k].chapter;
 
@@ -69,7 +60,6 @@ function checkDownloads() {
 
         //Descargo lo nuevo
         if (newTorrents !== null) {
-            console.log("Proceso New torrents");
             //Voy una a una bajando y generando notificación
             var notifications = JSON.parse(localStorage.getItem('notifications')),
                 m = new Date();
@@ -87,7 +77,6 @@ function checkDownloads() {
                 ("0" + m.getUTCSeconds()).slice(-2);
 
             for (i = 0; i < newTorrents.length; i++) {
-                console.log("Torrent " + newTorrents[i].id);
 
                 chrome.downloads.download({
                     url: "http://txibitsoft.com/bajatorrent.php?id=" + newTorrents[i].id
@@ -118,9 +107,7 @@ function checkDownloads() {
 
 //Listener de cuando salta la alarma
 chrome.alarms.onAlarm.addListener(function (alarm) {
-    console.log("suena: " + alarm.name);
     if (alarm.name === 'trex') {
-        console.log("alarma suena");
         checkDownloads();
     }
 });
@@ -133,7 +120,7 @@ var statusTrexIcon = (localStorage.getItem('trexStatus') === 'true');
 if (statusTrexIcon) {
     chrome.browserAction.setIcon({path: 'images/activeIcon.png'});
 }
-delete statusTrexIcon;
+statusTrexIcon = null; //Libero memoria
 
 //Notificaciones
 var notisTRexBadge = localStorage.getItem('notifications');
@@ -148,7 +135,7 @@ if (notisTRexBadge !== undefined && notisTRexBadge !== null) {
         });
     }
 }
-delete notisTRexBadge;
+notisTRexBadge = null;
 
 function procesarTorrents(listaTorrents) {
     var torrent, metadata, aux, ultimaTemporada = 0, temporadas = [], temporadaUltimoCapitulo = [],
@@ -166,10 +153,7 @@ function procesarTorrents(listaTorrents) {
             }
         }
     }
-    console.log("Excludios: ");
-    console.log(excluded);
 
-//http://www.txibitsoft.com/torrents.php?procesar=1&texto=patata&chkdescripcion=&chkfecha=&txtfecha=05/02/2015&txtfecha2=05/02/2015&categorias=%27Cine%20Alta%20Definicion%20HD%27,%27Peliculas%27,%27Peliculas%20Castellano%27
     //Recorro los torrents y voy extrayendo su metainformación
     for (var key in listaTorrents) {
         if (listaTorrents.hasOwnProperty(key)) {
@@ -183,7 +167,6 @@ function procesarTorrents(listaTorrents) {
             metadata = extractMetaInfo(torrent.title);
 
             if (metadata !== null) {
-                console.log(metadata);
 
                 //categoria
                 aux = torrent.category.split(' > ');
@@ -241,8 +224,7 @@ function procesarTorrents(listaTorrents) {
             });
         }
     }
-    console.log("TEMP");
-    console.log(temps);
+
     return {
         lastSeason: ultimaTemporada,
         lastChapter: temporadaUltimoCapitulo[ultimaTemporada],

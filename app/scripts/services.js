@@ -92,8 +92,6 @@ appServices.service('torrentService', function () {
                 }
             }
         }
-        console.log("Excludios: ");
-        console.log(excluded);
 
         //Recorro los torrents y voy extrayendo su metainformación
         for (var key in listaTorrents) {
@@ -108,7 +106,6 @@ appServices.service('torrentService', function () {
                 metadata = extractMetaInfo(torrent.title);
 
                 if (metadata !== null) {
-                    console.log(metadata);
 
                     //categoria
                     aux = torrent.category.split(' > ');
@@ -165,8 +162,7 @@ appServices.service('torrentService', function () {
                 });
             }
         }
-        console.log("TEMP");
-        console.log(temps);
+
         return {
             lastSeason: ultimaTemporada,
             lastChapter: temporadaUltimoCapitulo[ultimaTemporada],
