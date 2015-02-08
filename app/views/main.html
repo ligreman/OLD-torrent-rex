@@ -54,16 +54,20 @@
         </md-card>
     </md-content>
 
-    <md-toolbar class="md-medium-tall fixed bottom-right transparent">
+    <md-toolbar class="fixed bottom-right botonera">
         <!--<div class="md-toolbar-tools md-toolbar-tools-bottom">-->
-        <md-button class="md-primary md-fab md-fab-bottom-right" ng-click="goto('series')"
-                   aria-label="" title="Añadir serie">
-            <md-icon icon="images/ic_add_white_24dp.png" style="width: 24px; height: 24px;"></md-icon>
-        </md-button>
-        <md-button class="md-warn md-fab md-fab-bottom-left" ng-click="goto('torrents')"
-                   aria-label="" title="Buscar torrent">
-            <md-icon icon="images/ic_search_white_36dp.png" style="width: 24px; height: 24px;"></md-icon>
-        </md-button>
+        <div layout="row" layout-align="space-around center">
+            <md-button class="md-warn md-fab md-fab-bottom-left2" ng-click="goto('torrents')"
+                       aria-label="" title="Buscar torrent">
+                <md-icon icon="images/ic_search_white_36dp.png" style="width: 24px; height: 24px;"></md-icon>
+            </md-button>
+            <p class="black md-whiteframe-z1 last-check" ng-hide="lastCheck == ''">Última comprobación:
+                {{lastCheck}}</p>
+            <md-button class="md-primary md-fab md-fab-bottom-right2" ng-click="goto('series')"
+                       aria-label="" title="Añadir serie">
+                <md-icon icon="images/ic_add_white_24dp.png" style="width: 24px; height: 24px;"></md-icon>
+            </md-button>
+        </div>
         <!--</div>-->
     </md-toolbar>
 </div>

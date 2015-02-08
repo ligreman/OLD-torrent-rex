@@ -5,6 +5,7 @@ appControllers.controller('MainCtrl', ['$scope', '$route', '$location', '$http',
     function ($scope, $route, $location, $http, $mdDialog, paramService) {
         $scope.series = JSON.parse(localStorage.getItem('series'));
         $scope.trexStatus = (localStorage.getItem('trexStatus') === 'true');
+        $scope.lastCheck = localStorage.getItem('lastCheck');
 
         $scope.changeTrexStatus = function () {
             localStorage.setItem('trexStatus', $scope.trexStatus);
@@ -330,13 +331,19 @@ function addSerieDownload($scope, answer) {
         }
     }
     if (!yaExiste) {
+        //Resto 1 porque así bajo el que me ha indicado el usuario
+        var epi = answer.fromEpisodio - 1;
+        /*if (epi <= 0) {
+         epi = 1;
+         }*/
+
         //Inicializo si hace falta
         actualSeries.push({
             title: $scope.title,
             url: $scope.url,
             language: $scope.info.language,
             lastSeason: answer.fromTemporada,
-            lastChapter: answer.fromEpisodio - 1, //-1 porque así bajo el que me ha indicado el usuario
+            lastChapter: epi,
             excluded: {},
             active: true
         });

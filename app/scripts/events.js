@@ -1,13 +1,23 @@
+//Logger
+var DEBUG_MODE = false;
+function logger(msg) {
+    if (DEBUG_MODE) {
+        console.log(msg);
+    }
+}
+
 function checkDownloads() {
     var status = (localStorage.getItem('trexStatus') === 'true'),
         series, newTorrents = null, url, datos, lastSerie;
+
+    logger("Comienzo la comprobación de descargas");
 
     //Si está activo TRex
     if (status) {
         //Cojo las series y miro una a una
         series = JSON.parse(localStorage.getItem('series'));
 
-        if (series.length === 0) {
+        if (series === undefined || series === null || series.length === 0) {
             return null;
         }
 
@@ -16,6 +26,8 @@ function checkDownloads() {
             if (!series[i].active) {
                 continue;
             }
+
+            logger("  Miro la serie: " + series[i].title);
 
             newTorrents = [];
             //Pido al ws la lista de torrents de la serie
@@ -108,8 +120,14 @@ function checkDownloads() {
 //Listener de cuando salta la alarma
 chrome.alarms.onAlarm.addListener(function (alarm) {
     if (alarm.name === 'trex') {
+        logger("Salta la alarma");
         checkDownloads();
     }
+
+    //última comprobación
+    var d = new Date();
+    localStorage.setItem('lastCheck', d.getHours() + ':' + d.getMinutes());
+    logger("Guardo la hora de comprobación: " + d.getHours() + ':' + d.getMinutes());
 });
 
 //Al iniciar navegador compruebo (le doy un minuto)

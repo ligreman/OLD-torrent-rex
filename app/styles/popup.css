@@ -29,6 +29,10 @@ html p, body p {
     text-align: right;
 }
 
+.black {
+    color: #000000;
+}
+
 .enlace {
     cursor: pointer;
     color: #304FFE;
@@ -177,4 +181,15 @@ md-dialog p {
 
 md-backdrop.md-opaque.md-default-theme, .md-dialog-container {
     position: fixed;
+}
+
+#popup md-toolbar.botonera {
+    padding-top: 4px;
+    background-color: rgba(63, 81, 181, 0.2);
+}
+
+.last-check {
+    padding: 4px 20px;
+    background: #FFFFFF;
+    font-size: 0.8em;
 }

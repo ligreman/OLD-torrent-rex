@@ -36,3 +36,10 @@ var myApp = angular.module('TorrentRex', [
             .primaryColor('indigo')
             .accentColor('green');
     }]);
+
+/*$rootScope.DEBUG_MODE = true;
+ $rootScope.logger = function logger(msg) {
+ if ($rootScope.DEBUG_MODE) {
+ console.log(msg);
+ }
+ };*/
