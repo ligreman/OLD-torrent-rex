@@ -94,9 +94,9 @@ appServices.service('torrentService', function () {
         }
 
         //Recorro los torrents y voy extrayendo su metainformación
-        for (var key in listaTorrents) {
-            if (listaTorrents.hasOwnProperty(key)) {
-                torrent = listaTorrents[key];
+        for (var key2 in listaTorrents) {
+            if (listaTorrents.hasOwnProperty(key2)) {
+                torrent = listaTorrents[key2];
 
                 //Miro a ver si está excluido
                 if (excluded.indexOf(torrent.id) !== -1) {

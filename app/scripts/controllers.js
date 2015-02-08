@@ -333,9 +333,6 @@ function addSerieDownload($scope, answer) {
     if (!yaExiste) {
         //Resto 1 porque así bajo el que me ha indicado el usuario
         var epi = answer.fromEpisodio - 1;
-        /*if (epi <= 0) {
-         epi = 1;
-         }*/
 
         //Inicializo si hace falta
         actualSeries.push({
@@ -365,7 +362,7 @@ function checkAlarms() {
         //La creo. Como va con nombre no hay problema de duplicados
         chrome.alarms.create('trex', {
             delayInMinutes: 1,
-            periodInMinutes: 1
+            periodInMinutes: 60
         });
     } else {
         //Desactivo alarmas
