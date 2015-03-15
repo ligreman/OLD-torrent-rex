@@ -93,12 +93,12 @@ appServices.service('torrentService', function () {
             }
         }
 
-        //Recorro los torrents y voy extrayendo su metainformaciÃ³n
+        //Recorro los torrents y voy extrayendo su metainformación
         for (var key2 in listaTorrents) {
             if (listaTorrents.hasOwnProperty(key2)) {
                 torrent = listaTorrents[key2];
 
-                //Miro a ver si estÃ¡ excluido
+                //Miro a ver si está excluido
                 if (excluded.indexOf(torrent.id) !== -1) {
                     continue;
                 }
@@ -125,12 +125,12 @@ appServices.service('torrentService', function () {
                         format: metadata.formato
                     };
 
-                    //Ãšltima temporada
+                    //Última temporada
                     if (ultimaTemporada < metadata.temporada) {
                         ultimaTemporada = metadata.temporada;
                     }
 
-                    //Ãšltimo capÃ­tulo de la temporada
+                    //Último capítulo de la temporada
                     if (temporadaUltimoCapitulo[metadata.temporada] === undefined || temporadaUltimoCapitulo[metadata.temporada] < metadata.capitulo) {
                         temporadaUltimoCapitulo[metadata.temporada] = metadata.capitulo;
                     }
@@ -177,7 +177,7 @@ appServices.service('torrentService', function () {
 });
 
 
-//Esta funciÃ³n extrae la temporada, el formato, idioma y el capÃ­tulo, del tÃ­tulo de un torrent
+//Esta función extrae la temporada, el formato, idioma y el capítulo, del título de un torrent
 function extractMetaInfo(torrentTitle) {
     var temporada = null, capitulo = null, formato = null, idioma = null;
 
@@ -188,7 +188,7 @@ function extractMetaInfo(torrentTitle) {
         aux = aux.split(' ');
         aux = parseInt(aux[1]);
 
-        //Compruebo que es un nÃºmero de verdad
+        //Compruebo que es un número de verdad
         if (!isNaN(aux)) {
             temporada = aux;
         }
@@ -216,7 +216,7 @@ function extractMetaInfo(torrentTitle) {
             }
         }
 
-        //Saco el capÃ­tulo
+        //Saco el capítulo
         var auxCap = aux.charAt(aux.length - 2) + aux.charAt(aux.length - 1); //de Cap.103 es el 03
         auxCap = parseInt(auxCap);
         if (!isNaN(auxCap)) {
@@ -225,12 +225,12 @@ function extractMetaInfo(torrentTitle) {
     }
 
     //El idioma
-    aux = torrentTitle.match(/V.O.Sub.[A-Za-zÃ±Ã¡Ã©Ã­Ã³ÃºÃÃ‰ÃÃ“Ãš ]*/gi);
+    aux = torrentTitle.match(/V.O.Sub.[A-Za-zñáéíóúÁÉÍÓÚ ]*/gi);
     if (aux !== undefined && aux !== null && aux !== '') {
         aux = aux[0];
         idioma = aux;
     } else {
-        aux = torrentTitle.match(/EspaÃ±ol[A-Za-zÃ±Ã¡Ã©Ã­Ã³ÃºÃÃ‰ÃÃ“Ãš ]*/gi);
+        aux = torrentTitle.match(/Español[A-Za-zñáéíóúÁÉÍÓÚ ]*/gi);
         if (aux !== undefined && aux !== null && aux !== '') {
             aux = aux[0];
             idioma = aux;

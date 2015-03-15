@@ -143,7 +143,7 @@ module.exports = function (grunt) {
                 }]
             },
             server: '.tmp',
-            postBuild: '<%= yeoman.dist %>/scripts/events.*.js'
+            distFinale: '<%= yeoman.dist %>/scripts/events.*.js'
         },
 
         // Add vendor prefixed styles
@@ -191,7 +191,8 @@ module.exports = function (grunt) {
                 flow: {
                     html: {
                         steps: {
-                            js: ['concat', 'uglifyjs'],
+                            //js: ['concat', 'uglifyjs'],
+                            js: ['concat'],
                             css: ['cssmin']
                         },
                         post: {}
@@ -224,11 +225,12 @@ module.exports = function (grunt) {
         // },
         uglify: {
             distFinale: {
-                files: {
-                    '<%= yeoman.dist %>/scripts/events.js': [
-                        '<%= yeoman.app %>/scripts/events.js'
-                    ]
-                }
+                files: [{
+                    expand: true,
+                    cwd: '<%= yeoman.app %>/scripts',
+                    src: '*.js',
+                    dest: '<%= yeoman.dist %>/scripts'
+                }]
             }
         },
         // concat: {
@@ -324,6 +326,17 @@ module.exports = function (grunt) {
                 cwd: '<%= yeoman.app %>/styles',
                 dest: '.tmp/styles/',
                 src: '{,*/}*.css'
+            },
+            distFinale: {
+                files: [{
+                    expand: true,
+                    dot: true,
+                    cwd: '<%= yeoman.app %>',
+                    dest: '<%= yeoman.dist %>',
+                    src: [
+                        'scripts/*.js'
+                    ]
+                }]
             }
         },
 
@@ -386,17 +399,18 @@ module.exports = function (grunt) {
         'useminPrepare',
         'concurrent:dist',
         'autoprefixer',
-        //'concat',
+        'concat',
         'ngAnnotate',
         'copy:dist',
         //'cdnify',
         'cssmin',
-        'uglify',
-        'filerev',
+        //'uglify',
+        //'filerev',
         'usemin',
         'htmlmin',
-        'uglify:distFinale',
-        'clean:postBuild'
+        //'uglify:distFinale'
+        'copy:distFinale'
+        //'clean:postBuild'
     ]);
 
     grunt.registerTask('default', [
