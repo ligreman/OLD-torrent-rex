@@ -18,8 +18,10 @@ module.exports = function (grunt) {
     // Configurable paths for the application
     var appConfig = {
         app: require('./bower.json').appPath || 'app',
-        dist: 'dist'
+        dist: 'dist',
+        manifest: grunt.file.readJSON('package.json')
     };
+    appConfig.manifest = grunt.file.readJSON(appConfig.app + '/manifest.json');
 
     // Define the configuration for all the tasks
     grunt.initConfig({
@@ -340,6 +342,18 @@ module.exports = function (grunt) {
             }
         },
 
+        // make a zipfile
+        compress: {
+            dist: {
+                options: {
+                    archive: '<%= yeoman.dist %>/trex-v<%= yeoman.manifest.version %>.zip'
+                },
+                files: [
+                    {expand: true, cwd: '<%= yeoman.dist %>/', src: ['**'], dest: ''}
+                ]
+            }
+        },
+
         // Run some tasks in parallel to speed up the build process
         concurrent: {
             server: [
@@ -409,8 +423,9 @@ module.exports = function (grunt) {
         'usemin',
         'htmlmin',
         //'uglify:distFinale'
-        'copy:distFinale'
+        'copy:distFinale',
         //'clean:postBuild'
+        'compress:dist'
     ]);
 
     grunt.registerTask('default', [

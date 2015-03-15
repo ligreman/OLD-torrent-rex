@@ -1,7 +1,7 @@
 var appServices = angular.module('appServices', []);
 
 appServices.service('paramService', function () {
-    var url = '', title = '', source = '', exclusionInfo,
+    var url = '', title = '', source = '', exclusionInfo, category = '',
         seasonLimits = {}, chapterLimits = {};
 
     var setUrl = function (newUrl) {
@@ -58,6 +58,14 @@ appServices.service('paramService', function () {
         return exclusionInfo;
     };
 
+    var setCategory = function (cat) {
+        category = cat;
+    };
+
+    var getCategory = function () {
+        return category;
+    };
+
     return {
         setUrl: setUrl,
         getUrl: getUrl,
@@ -70,7 +78,9 @@ appServices.service('paramService', function () {
         setSource: setSource,
         getSource: getSource,
         setExclusionInfo: setExclusionInfo,
-        getExclusionInfo: getExclusionInfo
+        getExclusionInfo: getExclusionInfo,
+        getCategory: getCategory,
+        setCategory: setCategory
     };
 
 });

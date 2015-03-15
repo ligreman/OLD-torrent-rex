@@ -120,10 +120,11 @@ appControllers.controller('SeriesCtrl', ['$scope', '$location', '$http', 'paramS
             });
 
         //GoTo
-        $scope.goto = function (path, param, name, source) {
+        $scope.goto = function (path, param, name, category, source) {
             paramService.setUrl(param);
             paramService.setTitle(name);
             paramService.setSource(source);
+            paramService.setCategory(category);
             $location.path('/' + path);
         };
     }]);
@@ -141,7 +142,8 @@ appControllers.controller('ChaptersCtrl', ['$scope', '$location', '$http', '$mdD
 
         //URL y título de la serie. El título no tiene metainformación
         $scope.url = paramService.getUrl();
-        $scope.title = paramService.getTitle();
+        $scope.category = paramService.getCategory();
+        $scope.title = generateTitle(paramService.getTitle(), $scope.category);
         $scope.source = paramService.getSource();
 
         //Toasts
@@ -352,6 +354,19 @@ function addSerieDownload($scope, answer) {
         });
         localStorage.setItem('series', JSON.stringify(actualSeries));
     }
+}
+
+function generateTitle(titulo, categoria) {
+    var newTitle = titulo;
+
+    //Miro a ver si tiene HD o V.O
+    if (categoria.search('HD') !== -1) {
+        newTitle += ' HD';
+    } else if (categoria.search('V.O') !== -1) {
+        newTitle += ' V.O.';
+    }
+
+    return newTitle;
 }
 
 function checkAlarms() {
