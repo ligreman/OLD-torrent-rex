@@ -1,9 +1,9 @@
 ﻿{
-    "name": "TorrentRex",
+    "name": "T-Rex",
+    "short_name": "T-Rex",
     "version": "1.0.0",
     "manifest_version": 2,
-    "description": "The torrent predator, feared all around the universe.",
-    //"default_locale": "es",
+    "description": "The byte predator, feared all around the universe.",
     "icons": {
         "128": "icon128.png"
     },
@@ -13,7 +13,7 @@
             "38": "images/defaultIcon38x38.png"
         },
         "default_popup": "index.html",
-        "default_title": "Torrent Rex"
+        "default_title": "T-Rex"
     },
     "background": {
         "scripts": ["scripts/events.js"],
