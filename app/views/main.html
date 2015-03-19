@@ -2,23 +2,26 @@
 
     <md-toolbar class="fixed">
         <div layout="row">
-            <h2 class="md-toolbar-tools" flex="75">
+            <h2 class="md-toolbar-tools" flex="70">
                 <span class="negrita"><img src="images/white.png"
-                                           style="vertical-align: text-bottom; width: 24px; cursor:pointer"
+                                           style="vertical-align: text-bottom; width: 30px; cursor:pointer"
                                            ng-click="about($event)" /> Series en descarga</span>
             </h2>
 
             <md-switch ng-model="trexStatus" name="trexStatus" ng-change="changeTrexStatus()"
-                       class="md-accent right" flex>
+                       class="md-accent right" flex="20">
                 {{trexStatus?'Activo':'Inactivo'}}
-                <md-tooltip>
-                    Activar/Desactivar TRex
-                </md-tooltip>
+                <md-tooltip> Activar/Desactivar TRex</md-tooltip>
             </md-switch>
+            <a href="chrome-extension://ccjildcogcgklkpedpomlbghfbikmeaa/options.html" class="right iconC" flex="10">
+                <img src="images/rueda.png" style="width: 24px; height: 24px;" />
+                <md-tooltip> Configuración</md-tooltip>
+            </a>
         </div>
     </md-toolbar>
 
-    <md-content class="header-spacing footer-spacing">
+
+    <md-content id="main" class="header-spacing footer-spacing">
         <h3 class="center" ng-show="series.length == 0">Añade series para su descarga automática.</h3>
         <md-card ng-repeat="serie in series track by serie.title">
             <div layout="row" ng-class="(serie.active)?'serie-enabled':'serie-disabled'">

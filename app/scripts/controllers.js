@@ -99,7 +99,7 @@ appControllers.controller('MainCtrl', ['$scope', '$route', '$location', '$http',
             $mdDialog.show(
                 $mdDialog.alert()
                     .title('Acerca de Torrent Rex')
-                    .content('Torrent Rex comprobará al arrancar el navegador, al activarse y cada hora (siempre que esté activo) si existen nuevos episodios de tus series favoritas, descargándo automáticamente los torrents a la carpeta de Descargas predefinida en tu navegador.')
+                    .content('Torrent Rex comprobará al arrancar el navegador, al activarse y cada hora (siempre que esté activo) si existen nuevos episodios de tus series favoritas, descargando automáticamente los torrents a la carpeta de Descargas predefinida en tu navegador.')
                     .ariaLabel('')
                     .ok('¡Me mola!')
                     .targetEvent(ev)

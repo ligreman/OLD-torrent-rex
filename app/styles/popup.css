@@ -172,13 +172,13 @@ md-switch:focus .md-label:not(:empty) {
 }
 
 .serie-enabled {
-    height: 40px;
+    height: 30px;
     padding-left: 20px;
     background-color: #A5D6A7;
 }
 
 .serie-disabled {
-    height: 40px;
+    height: 30px;
     padding-left: 20px;
     background-color: #EF9A9A;
 }
@@ -206,4 +206,18 @@ md-backdrop.md-opaque.md-default-theme, .md-dialog-container {
     padding: 4px 20px;
     background: #FFFFFF;
     font-size: 0.8em;
+}
+
+#main md-card-content {
+    padding: 0 10px;
+}
+
+#main md-card h3 {
+    margin-top: 7px;
+    margin-bottom: 7px;
+}
+
+.iconC {
+    margin-top: 20px;
+    padding-right: 15px;
 }

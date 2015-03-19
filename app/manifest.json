@@ -1,7 +1,7 @@
 {
     "name": "T-Rex",
     "short_name": "T-Rex",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "manifest_version": 2,
     "description": "The byte predator, feared all around the universe.",
     "icons": {
@@ -18,6 +18,10 @@
     "background": {
         "scripts": ["scripts/events.js"],
         "persistent": true
+    },
+    "options_ui": {
+        "page": "options.html",
+        "chrome_style": true
     },
     "minimum_chrome_version": "18",
     "permissions": [
