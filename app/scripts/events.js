@@ -66,7 +66,8 @@ function checkDownloads() {
                     }
                 }
             };
-            xmlhttp.open("GET", 'http://trex-lovehinaesp.rhcloud.com/api/tx/torrents/' + series[i].url, false);
+            //TODO testear las peticiones asíncronas estas
+            xmlhttp.open("GET", 'http://trex-lovehinaesp.rhcloud.com/api/tx/torrents/' + series[i].url, true);
             xmlhttp.send();
         }
 
@@ -91,7 +92,8 @@ function checkDownloads() {
             for (i = 0; i < newTorrents.length; i++) {
 
                 chrome.downloads.download({
-                    url: "http://txibitsoft.com/bajatorrent.php?id=" + newTorrents[i].id
+                    //url: "http://txibitsoft.com/bajatorrent.php?id=" + newTorrents[i].id
+                    url: "http://trex-lovehinaesp.rhcloud.com/api/tx/download/" + newTorrents[i].id
                 });
 
                 notifications.push({
@@ -119,7 +121,7 @@ function checkDownloads() {
 
 //Listener de cuando salta la alarma
 chrome.alarms.onAlarm.addListener(function (alarm) {
-    if (alarm.name === 'trex') {
+    if (alarm.name === 'trex' || alarm.name === 'checkTrex') {
         logger("Salta la alarma");
         checkDownloads();
     }
@@ -131,7 +133,10 @@ chrome.alarms.onAlarm.addListener(function (alarm) {
 });
 
 //Al iniciar navegador compruebo (le doy un minuto)
-setTimeout(checkDownloads, 60 * 1000);
+//setTimeout(checkDownloads, 60 * 1000);
+chrome.alarms.create('checkTrex', {
+    delayInMinutes: 1
+});
 
 //Icono
 var statusTrexIcon = (localStorage.getItem('trexStatus') === 'true');

@@ -173,7 +173,8 @@ appControllers.controller('ChaptersCtrl', ['$scope', '$location', '$http', '$mdD
         //Descarga de un torrent
         $scope.download = function (torrentId) {
             chrome.downloads.download({
-                url: "http://txibitsoft.com/bajatorrent.php?id=" + torrentId
+                //url: "http://txibitsoft.com/bajatorrent.php?id=" + torrentId
+                url: "http://trex-lovehinaesp.rhcloud.com/api/tx/download/" + torrentId
             });
         };
 
@@ -464,7 +465,8 @@ appControllers.controller('TorrentsCtrl', ['$scope', '$location', '$http',
         //Descarga de un torrent
         $scope.download = function (torrentId) {
             chrome.downloads.download({
-                url: "http://txibitsoft.com/bajatorrent.php?id=" + torrentId
+                //url: "http://txibitsoft.com/bajatorrent.php?id=" + torrentId
+                url: "http://trex-lovehinaesp.rhcloud.com/api/tx/download/" + torrentId
             });
         };
 
