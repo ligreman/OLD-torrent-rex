@@ -1,5 +1,5 @@
 //Logger
-var DEBUG_MODE = false;
+var DEBUG_MODE = true;
 function logger(msg) {
     if (DEBUG_MODE) {
         console.log(msg);
@@ -34,10 +34,15 @@ function checkDownloads() {
             url = atob(series[i].url);
             var xmlhttp = new XMLHttpRequest();
 
-            xmlhttp.onreadystatechange = function () {
+            xmlhttp.onload = function () {
+                logger("  El codigo de respuesta es: " + xmlhttp.readyState + " - " + xmlhttp.status);
+                logger(xmlhttp);
                 if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
                     var data = JSON.parse(xmlhttp.responseText);
                     datos = procesarTorrents(data.torrents);
+
+                    logger("  Recibo respuesta OK");
+                    logger(data);
 
                     //Comparo con los last de temporadas y capítulos descargados para saber si he de bajar algo nuevo
                     for (var j = 0; j < datos.seasons.length; j++) {
@@ -66,8 +71,7 @@ function checkDownloads() {
                     }
                 }
             };
-            //TODO testear las peticiones asíncronas estas
-            xmlhttp.open("GET", 'http://trex-lovehinaesp.rhcloud.com/api/tx/torrents/' + series[i].url, true);
+            xmlhttp.open("GET", 'http://trex-lovehinaesp.rhcloud.com/api/tx/torrents/' + series[i].url, false);
             xmlhttp.send();
         }
 
@@ -75,10 +79,17 @@ function checkDownloads() {
         if (newTorrents !== null) {
             //Voy una a una bajando y generando notificación
             var notifications = JSON.parse(localStorage.getItem('notifications')),
-                m = new Date();
+                downloads = JSON.parse(localStorage.getItem('downloads')),
+                m = new Date(), j = 0;
+
+            logger("  Lo nuevo es:");
+            logger(newTorrents);
 
             if (notifications === undefined || notifications === null) {
                 notifications = [];
+            }
+            if (downloads === undefined || downloads === null) {
+                downloads = [];
             }
 
             var dateString =
@@ -89,33 +100,43 @@ function checkDownloads() {
                 ("0" + m.getUTCMinutes()).slice(-2) + ":" +
                 ("0" + m.getUTCSeconds()).slice(-2);
 
-            for (i = 0; i < newTorrents.length; i++) {
-
-                chrome.downloads.download({
-                    //url: "http://txibitsoft.com/bajatorrent.php?id=" + newTorrents[i].id
-                    url: "http://trex-lovehinaesp.rhcloud.com/api/tx/download/" + newTorrents[i].id
+            for (i = 0, j = newTorrents.length; i < j; i++) {
+                //Añado el torrent a la lista de descargas
+                downloads.push({
+                    torrent: "http://trex-lovehinaesp.rhcloud.com/api/tx/download/" + newTorrents[i].id,
+                    title: newTorrents[i].title,
+                    retry: 0
                 });
 
-                notifications.push({
-                    text: newTorrents[i].title,
-                    date: dateString
-                });
-            }
+                /*downloadTorrent(newTorrents[i].id);
 
-            //Actualizo localstorage
-            localStorage.setItem('series', JSON.stringify(series));
-            localStorage.setItem('notifications', JSON.stringify(notifications));
-
-            //Pongo numerito en el icono
-            if (notifications.length > 0) {
-                chrome.browserAction.setBadgeText({
-                    text: "" + notifications.length
-                });
-                chrome.browserAction.setBadgeBackgroundColor({
-                    color: '#1B5E20'
-                });
+                 notifications.push({
+                 text: newTorrents[i].title,
+                 date: dateString
+                 });*/
             }
         }
+
+        //Proceso los torrents que me dieron error
+        //retryErrorTorrents();
+
+        logger("  Añado a downloads");
+        logger(downloads);
+
+        //Actualizo localstorage
+        localStorage.setItem('series', JSON.stringify(series));
+        localStorage.setItem('downloads', JSON.stringify(downloads));
+        //localStorage.setItem('notifications', JSON.stringify(notifications));
+
+        /*//Pongo numerito en el icono
+         if (notifications.length > 0) {
+         chrome.browserAction.setBadgeText({
+         text: "" + notifications.length
+         });
+         chrome.browserAction.setBadgeBackgroundColor({
+         color: '#1B5E20'
+         });
+         }*/
     }
 }
 
@@ -128,7 +149,7 @@ chrome.alarms.onAlarm.addListener(function (alarm) {
 
     //última comprobación
     var d = new Date();
-    localStorage.setItem('lastCheck', d.getHours() + ':' + d.getMinutes());
+    localStorage.setItem('lastCheck', formatTime(d.getHours()) + ':' + formatTime(d.getMinutes()));
     logger("Guardo la hora de comprobación: " + d.getHours() + ':' + d.getMinutes());
 });
 
@@ -324,5 +345,46 @@ function extractMetaInfo(torrentTitle) {
             idioma: idioma,
             formato: formato
         }
+    }
+}
+
+function formatTime(tt) {
+    tt = parseInt(tt);
+    if (tt <= 9) {
+        return '0' + tt;
+    } else {
+        return tt;
+    }
+}
+
+function downloadTorrent(idTorrent) {
+    chrome.downloads.download({
+        //url: "http://txibitsoft.com/bajatorrent.php?id=" + newTorrents[i].id
+        url: "http://trex-lovehinaesp.rhcloud.com/api/tx/download/" + idTorrent
+    }, function (idDownload) {
+        if (idDownload === undefined || idDownload.state === 'interrupted') {
+            //Falló la descarga, añado el torrent a errores
+            var errores = JSON.parse(localStorage.getItem('errores'));
+            if (errores === null || errores === undefined) {
+                errores = [];
+            }
+
+            errores.push(idTorrent);
+            localStorage.setItem('errores', JSON.stringify(errores));
+        }
+    });
+}
+
+function retryErrorTorrents() {
+    var errores = JSON.parse(localStorage.getItem('errores'));
+
+    var limpio = [];
+    //Limpio ya que voy a intentar de nuevo bajarlos
+    localStorage.setItem('errores', JSON.stringify(limpio));
+
+    if (errores !== null && errores !== undefined) {
+        errores.forEach(function (tId, index, array) {
+            downloadTorrent(tId);
+        });
     }
 }

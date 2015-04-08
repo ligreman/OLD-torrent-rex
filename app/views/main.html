@@ -2,7 +2,7 @@
 
     <md-toolbar class="fixed">
         <div layout="row">
-            <h2 class="md-toolbar-tools" flex="70">
+            <h2 class="md-toolbar-tools" flex="65">
                 <span class="negrita"><img src="images/white.png"
                                            style="vertical-align: text-bottom; width: 30px; cursor:pointer"
                                            ng-click="about($event)" /> Series en descarga</span>
@@ -43,8 +43,8 @@
             <md-card-content ng-init="cuantos = countExcluded(serie.excluded)">
                 <div layout="row" layout-align="start center">
                     <div flex="90">
-                        <p>Último capítulo descargado: Temporada {{serie.lastSeason}} - Capítulo
-                            {{serie.lastChapter}}</p>
+                        <p>Último capítulo descargado: <span class="enlace" ng-click="showChangeData($event, serie)">Temporada {{serie.lastSeason}} - Capítulo
+                            {{serie.lastChapter}}</span></p>
                         <p ng-show="cuantos>0" class="enlace"
                            ng-click="showExclusions($event, serie.title)">Exclusiones: {{cuantos}}</p>
                     </div>
@@ -60,16 +60,23 @@
     <md-toolbar class="fixed bottom-right botonera">
         <!--<div class="md-toolbar-tools md-toolbar-tools-bottom">-->
         <div layout="row" layout-align="space-around center">
-            <md-button class="md-warn md-fab md-fab-bottom-left2" ng-click="goto('torrents')"
+            <md-button class="md-primary md-fab" ng-click="goto('torrents')"
                        aria-label="" title="Buscar torrent">
                 <md-icon icon="images/ic_search_white_36dp.png" style="width: 24px; height: 24px;"></md-icon>
             </md-button>
-            <p class="black md-whiteframe-z1 last-check" ng-hide="lastCheck == ''">Última comprobación:
-                {{lastCheck}}</p>
-            <md-button class="md-primary md-fab md-fab-bottom-right2" ng-click="goto('series')"
+            <div layour="row">
+                <p class="black md-whiteframe-z1 last-check" ng-hide="lastCheck == ''">Última comprobación:
+                    {{lastCheck}}</p>
+                <button class="md-button md-warn md-default-theme" ng-show="errorTorrents.length>0"
+                        ng-click="showErrors($event)">
+                    <strong>{{errorTorrents.length}} errores al descargar</strong>
+                </button>
+            </div>
+            <md-button class="md-primary md-medium-tall md-fab" ng-click="goto('series')"
                        aria-label="" title="Añadir serie">
                 <md-icon icon="images/ic_add_white_24dp.png" style="width: 24px; height: 24px;"></md-icon>
             </md-button>
+
         </div>
         <!--</div>-->
     </md-toolbar>

@@ -9,7 +9,6 @@ if (datos !== null) {
 
     var hh = btoa(datos);
     var url = URL.createObjectURL(new Blob([hh], {type: 'text/plain'}));
-    console.log(url);
     document.getElementById('linkImportar').setAttribute('href', url);
 } else {
     document.getElementById('importar').innerHTML = "No hay datos.";

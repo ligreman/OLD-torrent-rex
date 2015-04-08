@@ -6,6 +6,7 @@ appControllers.controller('MainCtrl', ['$scope', '$route', '$location', '$http',
         $scope.series = JSON.parse(localStorage.getItem('series'));
         $scope.trexStatus = (localStorage.getItem('trexStatus') === 'true');
         $scope.lastCheck = localStorage.getItem('lastCheck');
+        $scope.errorTorrents = JSON.parse(localStorage.getItem('errores'));
 
         $scope.changeTrexStatus = function () {
             localStorage.setItem('trexStatus', $scope.trexStatus);
@@ -94,6 +95,36 @@ appControllers.controller('MainCtrl', ['$scope', '$route', '$location', '$http',
             return Object.keys(exclusions).length;
         };
 
+        //Mostrar errores de torrents
+        $scope.showErrors = function (ev) {
+            $mdDialog.show({
+                controller: ErroresDialogController,
+                templateUrl: 'views/templates/erroresDialog.tmpl.html',
+                targetEvent: ev
+            }).then(function (answer) {
+                if (answer > 0) {
+                    $scope.errorTorrents = JSON.parse(localStorage.getItem('errores'));
+                    $route.reload();
+                }
+            }, function () {
+            });
+        };
+
+        //Dialogo de cambio de episodio y temporada
+        $scope.showChangeData = function (ev, serie) {
+            paramService.setSource(serie);
+            $mdDialog.show({
+                controller: ChangeDataDialogController,
+                templateUrl: 'views/templates/changeDataDialog.tmpl.html',
+                targetEvent: ev
+            }).then(function (answer) {
+                if (answer > 0) {
+                    $route.reload();
+                }
+            }, function () {
+            });
+        };
+
         //About
         $scope.about = function (ev) {
             $mdDialog.show(
@@ -172,10 +203,7 @@ appControllers.controller('ChaptersCtrl', ['$scope', '$location', '$http', '$mdD
 
         //Descarga de un torrent
         $scope.download = function (torrentId) {
-            chrome.downloads.download({
-                //url: "http://txibitsoft.com/bajatorrent.php?id=" + torrentId
-                url: "http://trex-lovehinaesp.rhcloud.com/api/tx/download/" + torrentId
-            });
+            downloadTorrent(torrentId);
         };
 
         //Auxiliar para borrar el storage
@@ -300,7 +328,7 @@ function ExcludeDialogController($scope, $mdDialog, paramService) {
     $scope.cambios = 0;
 
     $scope.hide = function () {
-        $mdDialog.hide();
+        $mdDialog.hide($scope.cambios);
     };
     $scope.ok = function () {
         $mdDialog.hide($scope.cambios);
@@ -313,6 +341,45 @@ function ExcludeDialogController($scope, $mdDialog, paramService) {
             delete $scope.exclusions[id];
         }
     };
+}
+
+function ChangeDataDialogController($scope, $mdDialog, paramService) {
+    $scope.serie = paramService.getSource();
+    $scope.cambios = 0;
+    $scope.fromSeason = parseInt($scope.serie.lastSeason);
+    $scope.fromChapter = parseInt($scope.serie.lastChapter);
+
+    $scope.hide = function () {
+        $mdDialog.hide($scope.cambios);
+    };
+    $scope.ok = function (res) {
+        updateSerieData(res, $scope.serie.title);
+        $scope.cambios++;
+        $mdDialog.hide($scope.cambios);
+    };
+}
+
+function updateSerieData(newSerie, titulo) {
+    var newSesion, newChapter,
+        series = JSON.parse(localStorage.getItem('series'));
+
+    newSesion = parseInt(newSerie.fromTemporada);
+    newChapter = parseInt(newSerie.fromEpisodio);
+
+    series.forEach(function (serie, index, array) {
+        if (serie.title === titulo) {
+            if (!isNaN(newSesion)) {
+                series[index].lastSeason = newSesion;
+            }
+
+            if (!isNaN(newChapter)) {
+                series[index].lastChapter = newChapter;
+            }
+        }
+    });
+
+    localStorage.setItem('series', JSON.stringify(series));
+    return true;
 }
 
 //Añade series a descarga
@@ -335,14 +402,14 @@ function addSerieDownload($scope, answer) {
     }
     if (!yaExiste) {
         //Resto 1 porque así bajo el que me ha indicado el usuario
-        var epi = answer.fromEpisodio - 1;
+        var epi = parseInt(answer.fromEpisodio) - 1;
 
         //Inicializo si hace falta
         actualSeries.push({
             title: $scope.title,
             url: $scope.url,
             language: $scope.info.language,
-            lastSeason: answer.fromTemporada,
+            lastSeason: parseInt(answer.fromTemporada),
             lastChapter: epi,
             excluded: {},
             active: true
@@ -464,10 +531,7 @@ appControllers.controller('TorrentsCtrl', ['$scope', '$location', '$http',
 
         //Descarga de un torrent
         $scope.download = function (torrentId) {
-            chrome.downloads.download({
-                //url: "http://txibitsoft.com/bajatorrent.php?id=" + torrentId
-                url: "http://trex-lovehinaesp.rhcloud.com/api/tx/download/" + torrentId
-            });
+            downloadTorrent(torrentId);
         };
 
         //GoTo
@@ -475,3 +539,65 @@ appControllers.controller('TorrentsCtrl', ['$scope', '$location', '$http',
             $location.path('/' + path);
         };
     }]);
+
+
+function downloadTorrent(idTorrent) {
+    chrome.downloads.download({
+        //url: "http://txibitsoft.com/bajatorrent.php?id=" + torrentId
+        url: "http://trex-lovehinaesp.rhcloud.com/api/tx/download/" + idTorrent
+    }, function (idDownload) {
+        if (idDownload === undefined || idDownload.state === 'interrupted') {
+            //Falló la descarga, añado el torrent a errores
+            var errores = JSON.parse(localStorage.getItem('errores'));
+            if (errores === null || errores === undefined) {
+                errores = [];
+            }
+
+            errores.push(idTorrent);
+            localStorage.setItem('errores', JSON.stringify(errores));
+        }
+    });
+}
+
+function retryErrorTorrents() {
+    var errores = JSON.parse(localStorage.getItem('errores'));
+
+    var limpio = [];
+    //Limpio ya que voy a intentar de nuevo bajarlos
+    localStorage.setItem('errores', JSON.stringify(limpio));
+
+    if (errores !== null && errores !== undefined) {
+        errores.forEach(function (tId, index, array) {
+            downloadTorrent(tId);
+        });
+    }
+}
+
+function ErroresDialogController($scope, $mdDialog, $window) {
+    $scope.errores = JSON.parse(localStorage.getItem('errores'));
+    $scope.cambios = 0;
+
+    $scope.hide = function () {
+        $mdDialog.hide($scope.cambios);
+    };
+    $scope.downloadErrorTorrents = function () {
+        retryErrorTorrents();
+        $scope.cambios++;
+        $mdDialog.hide($scope.cambios);
+    };
+
+    $scope.openLink = function (id) {
+        $window.open('http://txibitsoft.com/bajatorrent.php?id=' + id, '_blank');
+        $scope.cambios++;
+    };
+
+    $scope.deleteError = function (id) {
+        var idx = $scope.errores.indexOf(id);
+
+        if (idx >= 0) {
+            $scope.errores.splice(idx, 1);
+            localStorage.setItem('errores', JSON.stringify($scope.errores));
+            $scope.cambios++;
+        }
+    };
+}
