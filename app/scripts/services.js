@@ -103,12 +103,12 @@ appServices.service('torrentService', function () {
             }
         }
 
-        //Recorro los torrents y voy extrayendo su metainformación
+        //Recorro los torrents y voy extrayendo su metainformaciï¿½n
         for (var key2 in listaTorrents) {
             if (listaTorrents.hasOwnProperty(key2)) {
                 torrent = listaTorrents[key2];
 
-                //Miro a ver si está excluido
+                //Miro a ver si estï¿½ excluido
                 if (excluded.indexOf(torrent.id) !== -1) {
                     continue;
                 }
@@ -135,12 +135,12 @@ appServices.service('torrentService', function () {
                         format: metadata.formato
                     };
 
-                    //Última temporada
+                    //ï¿½ltima temporada
                     if (ultimaTemporada < metadata.temporada) {
                         ultimaTemporada = metadata.temporada;
                     }
 
-                    //Último capítulo de la temporada
+                    //ï¿½ltimo capï¿½tulo de la temporada
                     if (temporadaUltimoCapitulo[metadata.temporada] === undefined || temporadaUltimoCapitulo[metadata.temporada] < metadata.capitulo) {
                         temporadaUltimoCapitulo[metadata.temporada] = metadata.capitulo;
                     }
@@ -186,8 +186,38 @@ appServices.service('torrentService', function () {
     };
 });
 
+//Servicio de constantes para compartir
+appServices.service('Constants', function () {
+    var constantes = {
+        txibi: {
+            urlCategories: 'http://trex-lovehinaesp.rhcloud.com/api/tx/categories',
+            urlTorrents: 'http://trex-lovehinaesp.rhcloud.com/api/tx/torrents',
+            urlSearch: 'http://trex-lovehinaesp.rhcloud.com/api/tx/search',
+            urlDownload: 'http://trex-lovehinaesp.rhcloud.com/api/tx/download'
+        },
+        eztv: {
+            urlCategories: 'http://trex-lovehinaesp.rhcloud.com/api/tx/categories',
+            urlTorrents: 'http://trex-lovehinaesp.rhcloud.com/api/tx/torrents',
+            urlSearch: 'http://trex-lovehinaesp.rhcloud.com/api/tx/search',
+            urlDownload: 'http://trex-lovehinaesp.rhcloud.com/api/tx/download'
+        }
+    };
 
-//Esta función extrae la temporada, el formato, idioma y el capítulo, del título de un torrent
+    var setConstant = function (key, value) {
+        constantes[key] = value;
+    };
+
+    var getConstants = function () {
+        return constantes;
+    };
+
+    return {
+        set: setConstant,
+        get: getConstants
+    };
+});
+
+//Esta funciï¿½n extrae la temporada, el formato, idioma y el capï¿½tulo, del tï¿½tulo de un torrent
 function extractMetaInfo(torrentTitle) {
     var temporada = null, capitulo = null, formato = null, idioma = null;
 
@@ -198,7 +228,7 @@ function extractMetaInfo(torrentTitle) {
         aux = aux.split(' ');
         aux = parseInt(aux[1]);
 
-        //Compruebo que es un número de verdad
+        //Compruebo que es un nï¿½mero de verdad
         if (!isNaN(aux)) {
             temporada = aux;
         }
@@ -226,7 +256,7 @@ function extractMetaInfo(torrentTitle) {
             }
         }
 
-        //Saco el capítulo
+        //Saco el capï¿½tulo
         var auxCap = aux.charAt(aux.length - 2) + aux.charAt(aux.length - 1); //de Cap.103 es el 03
         auxCap = parseInt(auxCap);
         if (!isNaN(auxCap)) {
@@ -235,12 +265,12 @@ function extractMetaInfo(torrentTitle) {
     }
 
     //El idioma
-    aux = torrentTitle.match(/V.O.Sub.[A-Za-zñáéíóúÁÉÍÓÚ ]*/gi);
+    aux = torrentTitle.match(/V.O.Sub.[A-Za-zï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ]*/gi);
     if (aux !== undefined && aux !== null && aux !== '') {
         aux = aux[0];
         idioma = aux;
     } else {
-        aux = torrentTitle.match(/Español[A-Za-zñáéíóúÁÉÍÓÚ ]*/gi);
+        aux = torrentTitle.match(/Espaï¿½ol[A-Za-zï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ]*/gi);
         if (aux !== undefined && aux !== null && aux !== '') {
             aux = aux[0];
             idioma = aux;

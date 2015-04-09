@@ -151,12 +151,14 @@ appControllers.controller('MainCtrl', ['$scope', '$route', '$location', '$http',
     }]);
 
 //Controlador de la vista de A�adir serie - Categorias
-appControllers.controller('SeriesCtrl', ['$scope', '$location', '$http', 'paramService',
-    function ($scope, $location, $http, paramService) {
+appControllers.controller('SeriesCtrl', ['$scope', '$location', '$http', 'paramService', 'Constants',
+    function ($scope, $location, $http, paramService, Constants) {
+        var constantes = Constants.get();
+
         $scope.loading = true;
 
         //Consulto el WS para obtener las categor�as
-        $http.get('http://trex-lovehinaesp.rhcloud.com/api/tx/categories').
+        $http.get(constantes['txibi'].urlCategories).
             success(function (data) {
                 $scope.categories = data.categories;
                 $scope.loading = false;
@@ -174,8 +176,10 @@ appControllers.controller('SeriesCtrl', ['$scope', '$location', '$http', 'paramS
 
 
 //Controlador de la vista de A�adir series - Cap�tulos
-appControllers.controller('ChaptersCtrl', ['$scope', '$location', '$http', '$mdDialog', '$mdToast', 'paramService', 'torrentService',
-    function ($scope, $location, $http, $mdDialog, $mdToast, paramService, torrentService) {
+appControllers.controller('ChaptersCtrl', ['$scope', '$location', '$http', '$mdDialog', '$mdToast', 'paramService', 'torrentService', 'Constants',
+    function ($scope, $location, $http, $mdDialog, $mdToast, paramService, torrentService, Constants) {
+        var constantes = Constants.get();
+
         $scope.loading = true;
         $scope.info;
         $scope.chapLimits;
@@ -206,7 +210,7 @@ appControllers.controller('ChaptersCtrl', ['$scope', '$location', '$http', '$mdD
         };
 
         //Petici�n de los torrents
-        $http.get('http://trex-lovehinaesp.rhcloud.com/api/tx/torrents/' + $scope.url).
+        $http.get(constantes['txibi'].urlTorrents + '/' + $scope.url).
             success(function (data) {
                 $scope.loading = false;
 
@@ -518,8 +522,10 @@ function desexcluir($scope, id, showMsg) {
 //*****************************************************************//
 
 //Controlador de la vista de buscar torrents
-appControllers.controller('TorrentsCtrl', ['$scope', '$location', '$http',
-    function ($scope, $location, $http) {
+appControllers.controller('TorrentsCtrl', ['$scope', '$location', '$http', 'Constants',
+    function ($scope, $location, $http, Constants) {
+        var constantes = Constants.get();
+
         $scope.loading = false;
         $scope.currentPage = 0;
         $scope.maxPages = 0;
@@ -531,7 +537,7 @@ appControllers.controller('TorrentsCtrl', ['$scope', '$location', '$http',
             $scope.maxPages = 0;
 
             //Consulto el WS para obtener las categor�as
-            $http.get('http://trex-lovehinaesp.rhcloud.com/api/tx/search/' + btoa(term) + '/' + page).
+            $http.get(constantes['txibi'].urlSearch + '/' + btoa(term) + '/' + page).
                 success(function (data) {
                     $scope.torrents = data.torrents;
                     $scope.loading = false;
@@ -543,7 +549,7 @@ appControllers.controller('TorrentsCtrl', ['$scope', '$location', '$http',
 
         //Descarga de un torrent
         $scope.download = function (torrentId) {
-            downloadTorrent(torrentId);
+            downloadTorrent(constantes['txibi'].urlDownload + '/' + torrentId);
         };
 
         //GoTo
@@ -553,21 +559,20 @@ appControllers.controller('TorrentsCtrl', ['$scope', '$location', '$http',
     }]);
 
 
-function downloadTorrent(idTorrent) {
+function downloadTorrent(urlTorrent) {
     chrome.downloads.download({
-        //url: "http://txibitsoft.com/bajatorrent.php?id=" + torrentId
-        url: "http://trex-lovehinaesp.rhcloud.com/api/tx/download/" + idTorrent
+        url: urlTorrent
     }, function (idDownload) {
-        if (idDownload === undefined || idDownload.state === 'interrupted') {
-            //Fall� la descarga, a�ado el torrent a errores
-            var errores = JSON.parse(localStorage.getItem('errores'));
-            if (errores === null || errores === undefined) {
-                errores = [];
-            }
+        /*if (idDownload === undefined || idDownload.state === 'interrupted') {
+         //Fall� la descarga, a�ado el torrent a errores
+         var errores = JSON.parse(localStorage.getItem('errores'));
+         if (errores === null || errores === undefined) {
+         errores = [];
+         }
 
-            errores.push(idTorrent);
-            localStorage.setItem('errores', JSON.stringify(errores));
-        }
+         errores.push(urlTorrent);
+         localStorage.setItem('errores', JSON.stringify(errores));
+         }*/
     });
 }
 

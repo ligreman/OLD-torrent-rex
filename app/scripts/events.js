@@ -6,6 +6,21 @@ function logger(msg) {
     }
 }
 
+var constantes = {
+    txibi: {
+        urlCategories: 'http://trex-lovehinaesp.rhcloud.com/api/tx/categories',
+        urlTorrents: 'http://trex-lovehinaesp.rhcloud.com/api/tx/torrents',
+        urlSearch: 'http://trex-lovehinaesp.rhcloud.com/api/tx/search',
+        urlDownload: 'http://trex-lovehinaesp.rhcloud.com/api/tx/download'
+    },
+    eztv: {
+        urlCategories: 'http://trex-lovehinaesp.rhcloud.com/api/tx/categories',
+        urlTorrents: 'http://trex-lovehinaesp.rhcloud.com/api/tx/torrents',
+        urlSearch: 'http://trex-lovehinaesp.rhcloud.com/api/tx/search',
+        urlDownload: 'http://trex-lovehinaesp.rhcloud.com/api/tx/download'
+    }
+};
+
 function checkDownloads() {
     var status = (localStorage.getItem('trexStatus') === 'true'),
         series, newTorrents = null, url, datos, lastSerie;
@@ -71,7 +86,7 @@ function checkDownloads() {
                     }
                 }
             };
-            xmlhttp.open("GET", 'http://trex-lovehinaesp.rhcloud.com/api/tx/torrents/' + series[i].url, false);
+            xmlhttp.open("GET", constantes['txibi'].urlTorrents + '/' + series[i].url, false);
             xmlhttp.send();
         }
 
@@ -103,7 +118,7 @@ function checkDownloads() {
             for (i = 0, j = newTorrents.length; i < j; i++) {
                 //Añado el torrent a la lista de descargas
                 downloads.push({
-                    torrent: "http://trex-lovehinaesp.rhcloud.com/api/tx/download/" + newTorrents[i].id,
+                    torrent: constantes['txibi'].urlDownload + '/' + newTorrents[i].id,
                     title: newTorrents[i].title,
                     retry: 0
                 });
