@@ -128,6 +128,9 @@ function checkDownloads() {
         localStorage.setItem('downloads', JSON.stringify(downloads));
         //localStorage.setItem('notifications', JSON.stringify(notifications));
 
+        //Lanzo la descarga
+        processDownloads();
+
         /*//Pongo numerito en el icono
          if (notifications.length > 0) {
          chrome.browserAction.setBadgeText({
@@ -142,9 +145,16 @@ function checkDownloads() {
 
 //Listener de cuando salta la alarma
 chrome.alarms.onAlarm.addListener(function (alarm) {
+    logger("Salta la alarma");
+
+    //Compruebo si hay cosas nuevas que descargar
     if (alarm.name === 'trex' || alarm.name === 'checkTrex') {
-        logger("Salta la alarma");
         checkDownloads();
+    }
+
+    //Descargo ficheros
+    if (alarm.name === 'downloadTrex') {
+        processDownloads();
     }
 
     //última comprobación
@@ -357,20 +367,89 @@ function formatTime(tt) {
     }
 }
 
-function downloadTorrent(idTorrent) {
+function processDownloads() {
+    var descargas = JSON.parse(localStorage.getItem('downloads')),
+        notifications = JSON.parse(localStorage.getItem('notifications'));
+    var final = descargas.length, contador = 0, correctos = [],
+        timer = 0;
+
+    if (notifications === undefined || notifications === null) {
+        notifications = [];
+    }
+
+    descargas.forEach(function (torrent) {
+        timer++;
+        setTimeout(function () {
+            downloadTorrent(torrent, function (resultado) {
+                if (resultado) {
+                    //Añado el torrent como descargado
+                    correctos.push(torrent.torrent);
+
+                    //Meto notificación
+                    notifications.push({
+                        text: newTorrents[i].title,
+                        date: dateString
+                    });
+                }
+                contador++;
+
+                //Si ya he procesado todos, elimino los correctos
+                if (contador === final) {
+                    localStorage.setItem('notifications', JSON.stringify(notifications));
+
+                    //Pongo numerito en el icono
+                    if (notifications.length > 0) {
+                        chrome.browserAction.setBadgeText({
+                            text: "" + notifications.length
+                        });
+                        chrome.browserAction.setBadgeBackgroundColor({
+                            color: '#1B5E20'
+                        });
+                    }
+
+                    downloadsRemoveOK(correctos);
+                }
+            });
+        }, 2000 * timer);
+    });
+}
+
+function downloadsRemoveOK(correctos) {
+    var descargas = JSON.parse(localStorage.getItem('downloads')),
+        restantes = [];
+
+    descargas.forEach(function (torrent) {
+        //Si no encuentro el torrent en la lista de descargados correctamente lo mantengo
+        if (correctos.indexOf(torrent.torrent) === -1) {
+            torrent.retry++;
+            restantes.push(torrent);
+        }
+    });
+
+    //Al terminar guardo
+    localStorage.setItem('downloads', JSON.stringify(restantes));
+}
+
+//TODO ver si puedo saber cuando viene error de forma más fiable
+function downloadTorrent(torrent, callback) {
     chrome.downloads.download({
         //url: "http://txibitsoft.com/bajatorrent.php?id=" + newTorrents[i].id
-        url: "http://trex-lovehinaesp.rhcloud.com/api/tx/download/" + idTorrent
+        //url: "http://trex-lovehinaesp.rhcloud.com/api/tx/download/" + idTorrent
+        url: torrent.torrent
     }, function (idDownload) {
         if (idDownload === undefined || idDownload.state === 'interrupted') {
-            //Falló la descarga, añado el torrent a errores
-            var errores = JSON.parse(localStorage.getItem('errores'));
-            if (errores === null || errores === undefined) {
-                errores = [];
-            }
+            /*//Falló la descarga, añado el torrent a errores
+             var errores = JSON.parse(localStorage.getItem('errores'));
+             if (errores === null || errores === undefined) {
+             errores = [];
+             }
 
-            errores.push(idTorrent);
-            localStorage.setItem('errores', JSON.stringify(errores));
+             errores.push(idTorrent);
+             localStorage.setItem('errores', JSON.stringify(errores));*/
+            callback(false);
+        } else {
+            //Elimino de la lista de descargas el torrent -> usar callback
+            callback(true);
         }
     });
 }

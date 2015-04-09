@@ -5,7 +5,7 @@
             <h2 class="md-toolbar-tools" flex="65">
                 <span class="negrita"><img src="images/white.png"
                                            style="vertical-align: text-bottom; width: 30px; cursor:pointer"
-                                           ng-click="about($event)" /> Series en descarga</span>
+                                           ng-click="about($event)"/> Series en descarga</span>
             </h2>
 
             <md-switch ng-model="trexStatus" name="trexStatus" ng-change="changeTrexStatus()"
@@ -14,7 +14,7 @@
                 <md-tooltip> Activar/Desactivar TRex</md-tooltip>
             </md-switch>
             <a href="chrome-extension://ccjildcogcgklkpedpomlbghfbikmeaa/options.html" class="right iconC" flex="10">
-                <img src="images/rueda.png" style="width: 24px; height: 24px;" />
+                <img src="images/rueda.png" style="width: 24px; height: 24px;"/>
                 <md-tooltip> Configuración</md-tooltip>
             </a>
         </div>
@@ -45,6 +45,7 @@
                     <div flex="90">
                         <p>Último capítulo descargado: <span class="enlace" ng-click="showChangeData($event, serie)">Temporada {{serie.lastSeason}} - Capítulo
                             {{serie.lastChapter}}</span></p>
+
                         <p ng-show="cuantos>0" class="enlace"
                            ng-click="showExclusions($event, serie.title)">Exclusiones: {{cuantos}}</p>
                     </div>
@@ -65,11 +66,10 @@
                 <md-icon icon="images/ic_search_white_36dp.png" style="width: 24px; height: 24px;"></md-icon>
             </md-button>
             <div layour="row">
-                <p class="black md-whiteframe-z1 last-check" ng-hide="lastCheck == ''">Última comprobación:
-                    {{lastCheck}}</p>
-                <button class="md-button md-warn md-default-theme" ng-show="errorTorrents.length>0"
-                        ng-click="showErrors($event)">
-                    <strong>{{errorTorrents.length}} errores al descargar</strong>
+                <p class="black md-whiteframe-z1 last-check" ng-hide="lastCheck == ''">Última comprobación: {{lastCheck}}</p>
+                <button class="md-button md-primary md-default-theme" ng-show="downloadingTorrents.length>0"
+                        ng-click="showDownloadPile($event)">
+                    <strong>Descargas en cola: {{downloadingTorrents.length}} </strong>
                 </button>
             </div>
             <md-button class="md-primary md-medium-tall md-fab" ng-click="goto('series')"
