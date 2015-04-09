@@ -5,7 +5,7 @@
             <h2 class="md-toolbar-tools" flex="65">
                 <span class="negrita"><img src="images/white.png"
                                            style="vertical-align: text-bottom; width: 30px; cursor:pointer"
-                                           ng-click="about($event)"/> Series en descarga</span>
+                                           ng-click="about($event)" /> Series en descarga</span>
             </h2>
 
             <md-switch ng-model="trexStatus" name="trexStatus" ng-change="changeTrexStatus()"
@@ -13,8 +13,8 @@
                 {{trexStatus?'Activo':'Inactivo'}}
                 <md-tooltip> Activar/Desactivar TRex</md-tooltip>
             </md-switch>
-            <a href="chrome-extension://ccjildcogcgklkpedpomlbghfbikmeaa/options.html" class="right iconC" flex="10">
-                <img src="images/rueda.png" style="width: 24px; height: 24px;"/>
+            <a ng-href="{{opcionesLink}}" class="right iconC" flex="10">
+                <img src="images/rueda.png" style="width: 24px; height: 24px;" />
                 <md-tooltip> Configuración</md-tooltip>
             </a>
         </div>
@@ -66,7 +66,8 @@
                 <md-icon icon="images/ic_search_white_36dp.png" style="width: 24px; height: 24px;"></md-icon>
             </md-button>
             <div layour="row">
-                <p class="black md-whiteframe-z1 last-check" ng-hide="lastCheck == ''">Última comprobación: {{lastCheck}}</p>
+                <p class="black md-whiteframe-z1 last-check" ng-hide="lastCheck == ''">Última comprobación:
+                    {{lastCheck}}</p>
                 <button class="md-button md-primary md-default-theme" ng-show="downloadingTorrents.length>0"
                         ng-click="showDownloadPile($event)">
                     <strong>Descargas en cola: {{downloadingTorrents.length}} </strong>

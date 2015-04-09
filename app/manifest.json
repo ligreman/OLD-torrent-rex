@@ -1,7 +1,7 @@
 {
     "name": "T-Rex",
     "short_name": "T-Rex",
-    "version": "1.0.4",
+    "version": "1.1.0",
     "manifest_version": 2,
     "description": "The byte predator, feared all around the universe.",
     "icons": {
@@ -29,7 +29,6 @@
         "storage",
         "alarms",
         "notifications",
-        "http://trex-lovehinaesp.rhcloud.com/api/tx/*",
-        "http://txibitsoft.com/*"
+        "http://trex-lovehinaesp.rhcloud.com/api/tx/*"
     ]
 }

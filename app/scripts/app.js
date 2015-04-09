@@ -7,8 +7,8 @@ var myApp = angular.module('TorrentRex', [
     'ngResource',
     'ngSanitize',
     'ngMaterial'
-]).config(['$routeProvider', '$mdThemingProvider',
-    function ($routeProvider, $mdThemingProvider) {
+]).config(['$routeProvider', '$mdThemingProvider', '$compileProvider',
+    function ($routeProvider, $mdThemingProvider, $compileProvider) {
         //Routing
         $routeProvider.
             when('/main', {
@@ -35,6 +35,9 @@ var myApp = angular.module('TorrentRex', [
         $mdThemingProvider.theme('default')
             .primaryColor('indigo')
             .accentColor('green');
+
+        //Validación de urls
+        $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|http|chrome-extension):/);
     }]);
 
 /*$rootScope.DEBUG_MODE = true;

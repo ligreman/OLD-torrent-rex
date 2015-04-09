@@ -1,5 +1,5 @@
 //Logger
-var DEBUG_MODE = true;
+var DEBUG_MODE = false;
 function logger(msg) {
     if (DEBUG_MODE) {
         console.log(msg);
@@ -86,6 +86,7 @@ function checkDownloads() {
                     }
                 }
             };
+            //Ha de ser síncrono, con el false, para que luego se ejecute lo siguiente
             xmlhttp.open("GET", constantes['txibi'].urlTorrents + '/' + series[i].url, false);
             xmlhttp.send();
         }
@@ -94,8 +95,7 @@ function checkDownloads() {
         if (newTorrents !== null) {
             //Voy una a una bajando y generando notificación
             var notifications = JSON.parse(localStorage.getItem('notifications')),
-                downloads = JSON.parse(localStorage.getItem('downloads')),
-                m = new Date(), j = 0;
+                downloads = JSON.parse(localStorage.getItem('downloads')), j = 0;
 
             logger("  Lo nuevo es:");
             logger(newTorrents);
@@ -107,14 +107,6 @@ function checkDownloads() {
                 downloads = [];
             }
 
-            var dateString =
-                ("0" + m.getUTCDate()).slice(-2) + "/" +
-                ("0" + (m.getUTCMonth() + 1)).slice(-2) + "/" +
-                m.getUTCFullYear() + " " +
-                ("0" + m.getUTCHours()).slice(-2) + ":" +
-                ("0" + m.getUTCMinutes()).slice(-2) + ":" +
-                ("0" + m.getUTCSeconds()).slice(-2);
-
             for (i = 0, j = newTorrents.length; i < j; i++) {
                 //Añado el torrent a la lista de descargas
                 downloads.push({
@@ -122,18 +114,8 @@ function checkDownloads() {
                     title: newTorrents[i].title,
                     retry: 0
                 });
-
-                /*downloadTorrent(newTorrents[i].id);
-
-                 notifications.push({
-                 text: newTorrents[i].title,
-                 date: dateString
-                 });*/
             }
         }
-
-        //Proceso los torrents que me dieron error
-        //retryErrorTorrents();
 
         logger("  Añado a downloads");
         logger(downloads);
@@ -141,20 +123,9 @@ function checkDownloads() {
         //Actualizo localstorage
         localStorage.setItem('series', JSON.stringify(series));
         localStorage.setItem('downloads', JSON.stringify(downloads));
-        //localStorage.setItem('notifications', JSON.stringify(notifications));
 
-        //Lanzo la descarga
+        //Lanzo la descarga de torrents
         processDownloads();
-
-        /*//Pongo numerito en el icono
-         if (notifications.length > 0) {
-         chrome.browserAction.setBadgeText({
-         text: "" + notifications.length
-         });
-         chrome.browserAction.setBadgeBackgroundColor({
-         color: '#1B5E20'
-         });
-         }*/
     }
 }
 
@@ -179,7 +150,6 @@ chrome.alarms.onAlarm.addListener(function (alarm) {
 });
 
 //Al iniciar navegador compruebo (le doy un minuto)
-//setTimeout(checkDownloads, 60 * 1000);
 chrome.alarms.create('checkTrex', {
     delayInMinutes: 1
 });
@@ -215,9 +185,9 @@ function procesarTorrents(listaTorrents) {
     if (seriesActuales !== undefined && seriesActuales !== null && seriesActuales.length > 0) {
         //Busco la serie
         for (var i = 0; i < seriesActuales.length; i++) {
-            for (var key in seriesActuales[i].excluded) {
-                if (seriesActuales[i].excluded.hasOwnProperty(key)) {
-                    excluded.push(key);
+            for (var key2 in seriesActuales[i].excluded) {
+                if (seriesActuales[i].excluded.hasOwnProperty(key2)) {
+                    excluded.push(key2);
                 }
             }
         }
@@ -250,7 +220,6 @@ function procesarTorrents(listaTorrents) {
                     chapter: metadata.capitulo,
                     language: torrent.language,
                     languageTitle: metadata.idioma,
-                    //category: aux[0],
                     size: torrent.size,
                     format: metadata.formato
                 };
@@ -382,6 +351,7 @@ function formatTime(tt) {
     }
 }
 
+//Descarga los torrents de la cola
 function processDownloads() {
     var descargas = JSON.parse(localStorage.getItem('downloads')),
         notifications = JSON.parse(localStorage.getItem('notifications'));
@@ -400,9 +370,18 @@ function processDownloads() {
                     //Añado el torrent como descargado
                     correctos.push(torrent.torrent);
 
+                    var m = new Date();
+                    var dateString =
+                        ("0" + m.getUTCDate()).slice(-2) + "/" +
+                        ("0" + (m.getUTCMonth() + 1)).slice(-2) + "/" +
+                        m.getUTCFullYear() + " " +
+                        ("0" + m.getUTCHours()).slice(-2) + ":" +
+                        ("0" + m.getUTCMinutes()).slice(-2) + ":" +
+                        ("0" + m.getUTCSeconds()).slice(-2);
+
                     //Meto notificación
                     notifications.push({
-                        text: newTorrents[i].title,
+                        text: torrent.title,
                         date: dateString
                     });
                 }
@@ -429,6 +408,7 @@ function processDownloads() {
     });
 }
 
+//Elimina de la cola de descargas los torrents descargados correctamente
 function downloadsRemoveOK(correctos) {
     var descargas = JSON.parse(localStorage.getItem('downloads')),
         restantes = [];
@@ -445,40 +425,16 @@ function downloadsRemoveOK(correctos) {
     localStorage.setItem('downloads', JSON.stringify(restantes));
 }
 
-//TODO ver si puedo saber cuando viene error de forma más fiable
+//Descarga un torrent
 function downloadTorrent(torrent, callback) {
     chrome.downloads.download({
-        //url: "http://txibitsoft.com/bajatorrent.php?id=" + newTorrents[i].id
-        //url: "http://trex-lovehinaesp.rhcloud.com/api/tx/download/" + idTorrent
         url: torrent.torrent
     }, function (idDownload) {
         if (idDownload === undefined || idDownload.state === 'interrupted') {
-            /*//Falló la descarga, añado el torrent a errores
-             var errores = JSON.parse(localStorage.getItem('errores'));
-             if (errores === null || errores === undefined) {
-             errores = [];
-             }
-
-             errores.push(idTorrent);
-             localStorage.setItem('errores', JSON.stringify(errores));*/
             callback(false);
         } else {
             //Elimino de la lista de descargas el torrent -> usar callback
             callback(true);
         }
     });
-}
-
-function retryErrorTorrents() {
-    var errores = JSON.parse(localStorage.getItem('errores'));
-
-    var limpio = [];
-    //Limpio ya que voy a intentar de nuevo bajarlos
-    localStorage.setItem('errores', JSON.stringify(limpio));
-
-    if (errores !== null && errores !== undefined) {
-        errores.forEach(function (tId, index, array) {
-            downloadTorrent(tId);
-        });
-    }
 }

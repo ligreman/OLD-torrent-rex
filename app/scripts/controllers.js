@@ -1,13 +1,18 @@
 var appControllers = angular.module('appControllers', []);
 
 //Controlador de la vista inicial
-appControllers.controller('MainCtrl', ['$scope', '$route', '$location', '$http', '$mdDialog', 'paramService',
-    function ($scope, $route, $location, $http, $mdDialog, paramService) {
+appControllers.controller('MainCtrl', ['$scope', '$route', '$location', '$http', '$mdDialog', 'paramService', 'Constants',
+    function ($scope, $route, $location, $http, $mdDialog, paramService, Constants) {
         $scope.series = JSON.parse(localStorage.getItem('series'));
         $scope.trexStatus = (localStorage.getItem('trexStatus') === 'true');
         $scope.lastCheck = localStorage.getItem('lastCheck');
         $scope.errorTorrents = JSON.parse(localStorage.getItem('errores'));
         $scope.downloadingTorrents = JSON.parse(localStorage.getItem('downloads'));
+        $scope.opcionesLink = chrome.extension.getURL('options.html');
+
+        //Borro la lista de categorías
+        var constantes = Constants.get();
+        Constants.set('categorias', null);
 
         $scope.changeTrexStatus = function () {
             localStorage.setItem('trexStatus', $scope.trexStatus);
@@ -28,8 +33,8 @@ appControllers.controller('MainCtrl', ['$scope', '$route', '$location', '$http',
         //Quitar una serie
         $scope.removeSerie = function (ev, serieTitle) {
             var confirm = $mdDialog.confirm()
-                .title('�Eliminar descarga?')
-                .content('Se dejar� de descargar ' + serieTitle + '.')
+                .title('¿Eliminar descarga?')
+                .content('Se dejará de descargar ' + serieTitle + '.')
                 .ariaLabel('')
                 .ok('Aceptar')
                 .cancel('Cancelar')
@@ -96,21 +101,6 @@ appControllers.controller('MainCtrl', ['$scope', '$route', '$location', '$http',
             return Object.keys(exclusions).length;
         };
 
-        //Mostrar errores de torrents
-        $scope.showErrors = function (ev) {
-            $mdDialog.show({
-                controller: ErroresDialogController,
-                templateUrl: 'views/templates/erroresDialog.tmpl.html',
-                targetEvent: ev
-            }).then(function (answer) {
-                if (answer > 0) {
-                    $scope.errorTorrents = JSON.parse(localStorage.getItem('errores'));
-                    $route.reload();
-                }
-            }, function () {
-            });
-        };
-
         //Muestro el diálogo de la lista de descarga
         $scope.showDownloadPile = function (ev) {
             $mdDialog.show({
@@ -142,27 +132,36 @@ appControllers.controller('MainCtrl', ['$scope', '$route', '$location', '$http',
             $mdDialog.show(
                 $mdDialog.alert()
                     .title('Acerca de Torrent Rex')
-                    .content('Torrent Rex comprobar� al arrancar el navegador, al activarse y cada hora (siempre que est� activo) si existen nuevos episodios de tus series favoritas, descargando autom�ticamente los torrents a la carpeta de Descargas predefinida en tu navegador.')
+                    .content('Torrent Rex comprobará al arrancar el navegador, al activarse y cada hora (siempre que esté activo) si existen nuevos episodios de tus series favoritas, descargando automáticamente los torrents a la carpeta de Descargas predefinida en tu navegador.')
                     .ariaLabel('')
-                    .ok('�Me mola!')
+                    .ok('¡Me mola!')
                     .targetEvent(ev)
             );
         }
     }]);
 
-//Controlador de la vista de A�adir serie - Categorias
+//Controlador de la vista de Añadir serie - Categorias
 appControllers.controller('SeriesCtrl', ['$scope', '$location', '$http', 'paramService', 'Constants',
     function ($scope, $location, $http, paramService, Constants) {
         var constantes = Constants.get();
-
+        console.log(constantes);
         $scope.loading = true;
 
-        //Consulto el WS para obtener las categor�as
-        $http.get(constantes['txibi'].urlCategories).
-            success(function (data) {
-                $scope.categories = data.categories;
-                $scope.loading = false;
-            });
+        //Si ya tengo categorías cargando no consulto al webservice
+        if (constantes.categorias === undefined || constantes.categorias === null) {
+            console.log("Pido las categorías al webservice");
+            //Consulto el WS para obtener las categorï¿½as
+            $http.get(constantes['txibi'].urlCategories).
+                success(function (data) {
+                    $scope.categories = data.categories;
+                    $scope.loading = false;
+                    Constants.set('categorias', data.categories);
+                });
+        } else {
+            console.log("Ya tengo las categorías de antes");
+            $scope.categories = constantes.categorias;
+            $scope.loading = false;
+        }
 
         //GoTo
         $scope.goto = function (path, param, name, category, source) {
@@ -175,19 +174,19 @@ appControllers.controller('SeriesCtrl', ['$scope', '$location', '$http', 'paramS
     }]);
 
 
-//Controlador de la vista de A�adir series - Cap�tulos
+//Controlador de la vista de Añadir series - Capítulos
 appControllers.controller('ChaptersCtrl', ['$scope', '$location', '$http', '$mdDialog', '$mdToast', 'paramService', 'torrentService', 'Constants',
     function ($scope, $location, $http, $mdDialog, $mdToast, paramService, torrentService, Constants) {
         var constantes = Constants.get();
 
         $scope.loading = true;
-        $scope.info;
-        $scope.chapLimits;
+        $scope.info = null;
+        $scope.chapLimits = null;
 
         $scope.fromSeason = 0;
         $scope.fromChapter = 0;
 
-        //URL y t�tulo de la serie. El t�tulo no tiene metainformaci�n
+        //URL y título de la serie. El título no tiene metainformación
         $scope.url = paramService.getUrl();
         $scope.category = paramService.getCategory();
         $scope.title = generateTitle(paramService.getTitle(), $scope.category);
@@ -209,7 +208,7 @@ appControllers.controller('ChaptersCtrl', ['$scope', '$location', '$http', '$mdD
             );
         };
 
-        //Petici�n de los torrents
+        //Peticiï¿½n de los torrents
         $http.get(constantes['txibi'].urlTorrents + '/' + $scope.url).
             success(function (data) {
                 $scope.loading = false;
@@ -222,12 +221,8 @@ appControllers.controller('ChaptersCtrl', ['$scope', '$location', '$http', '$mdD
             downloadTorrent(torrentId);
         };
 
-        //Auxiliar para borrar el storage
-        /*$scope.deleteStorage = function () {
-         localStorage.removeItem('series');
-         };*/
 
-        //Comprueba si un torrent est� excluido
+        //Comprueba si un torrent estï¿½ excluido
         $scope.isExcluded = function (id) {
             var seriesActuales = JSON.parse(localStorage.getItem('series')), excluded = false;
             if (seriesActuales !== undefined && seriesActuales !== null && seriesActuales.length > 0) {
@@ -241,7 +236,7 @@ appControllers.controller('ChaptersCtrl', ['$scope', '$location', '$http', '$mdD
             return excluded;
         };
 
-        //Excluye un torrent de la descarga de esta serie (tiene que estar a�adida antes)
+        //Excluye un torrent de la descarga de esta serie (tiene que estar añadida antes)
         $scope.excludeTorrent = function (id, capiTitle, ev) {
             var seriesActuales = JSON.parse(localStorage.getItem('series')), error = false, encontrado = false;
 
@@ -249,7 +244,7 @@ appControllers.controller('ChaptersCtrl', ['$scope', '$location', '$http', '$mdD
                 //Busco la serie
                 for (var i = 0; i < seriesActuales.length; i++) {
                     if (seriesActuales[i].title == $scope.title) {
-                        //Esta es la serie, a�ado a la lista de exclusiones este torrent
+                        //Esta es la serie, añado a la lista de exclusiones este torrent
                         seriesActuales[i].excluded[id] = {title: capiTitle, torrentId: id};
                         encontrado = true;
                         break;
@@ -268,7 +263,7 @@ appControllers.controller('ChaptersCtrl', ['$scope', '$location', '$http', '$mdD
                 $mdDialog.show(
                     $mdDialog.alert()
                         .title('No se pudo excluir')
-                        .content('Antes de excluir un episodio has de a�adir la serie a las descargas autom�ticas. Despu�s ya puedes excluir manualmente los episodios que quieras.')
+                        .content('Antes de excluir un episodio has de añadir la serie a las descargas automáticas. Después ya puedes excluir manualmente los episodios que quieras.')
                         .ariaLabel('')
                         .ok('De acuerdo')
                         .targetEvent(ev)
@@ -281,13 +276,13 @@ appControllers.controller('ChaptersCtrl', ['$scope', '$location', '$http', '$mdD
             desexcluir($scope, id, true);
         };
 
-        //A�adir una descarga - dialogo
+        //Añadir una descarga - diálogo
         $scope.showAdd = function (ev) {
             if ($scope.info === null) {
                 return null;
             }
 
-            //Limites de capitulos por temporada
+            //Limites de capítulos por temporada
             $scope.chapLimits = [];
             for (var k in $scope.info.seasons) {
                 if ($scope.info.seasons.hasOwnProperty(k)) {
@@ -309,7 +304,7 @@ appControllers.controller('ChaptersCtrl', ['$scope', '$location', '$http', '$mdD
             });
         };
 
-        //A�adir directamente
+        //Añadir directamente
         $scope.addDirectly = function (answer) {
             addSerieDownload($scope, answer);
         };
@@ -321,7 +316,7 @@ appControllers.controller('ChaptersCtrl', ['$scope', '$location', '$http', '$mdD
     }]);
 
 
-/*********** FUNCIONES AUXILIARES ****************/
+/*********** CONTROLADORES DE DIÁLOGOS ****************/
 
 function DialogController($scope, $mdDialog, paramService) {
     $scope.seasonLimits = paramService.getSeasonLimits();
@@ -335,6 +330,28 @@ function DialogController($scope, $mdDialog, paramService) {
     };
     $scope.answer = function (answer) {
         $mdDialog.hide(answer);
+    };
+}
+
+function DownloadsDialogController($scope, $mdDialog, $mdToast) {
+    $scope.downloads = JSON.parse(localStorage.getItem('downloads'));
+
+    $scope.hide = function () {
+        $mdDialog.hide($scope.cambios);
+    };
+    $scope.downloadTorrents = function () {
+        //Creo un alarm para intentar descargar
+        chrome.alarms.create('downloadTrex', {
+            delayInMinutes: 1
+        });
+
+        //Toasts
+        $mdToast.show(
+            $mdToast.simple()
+                .content('Los torrents se intentarán descargar dentro de 1 minuto')
+                .position('bottom')
+                .hideDelay(3000)
+        );
     };
 }
 
@@ -375,6 +392,8 @@ function ChangeDataDialogController($scope, $mdDialog, paramService) {
     };
 }
 
+/*********** FUNCIONES AUXILIARES ****************/
+
 function updateSerieData(newSerie, titulo) {
     var newSesion, newChapter,
         series = JSON.parse(localStorage.getItem('series'));
@@ -398,9 +417,9 @@ function updateSerieData(newSerie, titulo) {
     return true;
 }
 
-//A�ade series a descarga
+//Añade series a descarga
 function addSerieDownload($scope, answer) {
-    //La a�ado a las ya existentes
+    //La añado a las ya existentes
     var yaExiste = false,
         actualSeries = JSON.parse(localStorage.getItem('series'));
 
@@ -408,16 +427,16 @@ function addSerieDownload($scope, answer) {
         actualSeries = [];
     }
 
-    //Compruebo que la serie no est� ya a�adida
+    //Compruebo que la serie no está ya añadida
     for (var i = 0; i < actualSeries.length; i++) {
         if (actualSeries[i].title == $scope.title) {
             //Error serie ya existe
-            $scope.showSimpleToast('La serie ya estaba descarg�ndose.');
+            $scope.showSimpleToast('La serie ya estaba descargándose.');
             yaExiste = true;
         }
     }
     if (!yaExiste) {
-        //Resto 1 porque as� bajo el que me ha indicado el usuario
+        //Resto 1 porque así bajo el que me ha indicado el usuario
         var epi = parseInt(answer.fromEpisodio) - 1;
 
         //Inicializo si hace falta
@@ -434,7 +453,7 @@ function addSerieDownload($scope, answer) {
         //Actualizo el storage
         chrome.storage.local.set({'series': actualSeries}, function () {
             //Todo ok
-            $scope.showSimpleToast('Serie a�adida correctamente.');
+            $scope.showSimpleToast('Serie añadida correctamente.');
         });
         localStorage.setItem('series', JSON.stringify(actualSeries));
     }
@@ -498,7 +517,7 @@ function desexcluir($scope, id, showMsg) {
         //Busco la serie
         for (var i = 0; i < seriesActuales.length; i++) {
             if (seriesActuales[i].title == $scope.title) {
-                //Esta es la serie, a�ado a la lista de exclusiones este torrent
+                //Esta es la serie, aï¿½ado a la lista de exclusiones este torrent
                 if (seriesActuales[i].excluded[id] !== undefined) {
                     delete seriesActuales[i].excluded[id];
                 }
@@ -514,11 +533,13 @@ function desexcluir($scope, id, showMsg) {
         }
     } else {
         if (showMsg) {
-            $scope.showSimpleToast('La serie no est� en descarga actualmente.');
+            $scope.showSimpleToast('La serie no está en descarga actualmente.');
         }
     }
 }
 
+//*****************************************************************//
+//*****************************************************************//
 //*****************************************************************//
 
 //Controlador de la vista de buscar torrents
@@ -536,7 +557,7 @@ appControllers.controller('TorrentsCtrl', ['$scope', '$location', '$http', 'Cons
             $scope.currentPage = 0;
             $scope.maxPages = 0;
 
-            //Consulto el WS para obtener las categor�as
+            //Consulto el WS para obtener las categorías
             $http.get(constantes['txibi'].urlSearch + '/' + btoa(term) + '/' + page).
                 success(function (data) {
                     $scope.torrents = data.torrents;
@@ -563,72 +584,6 @@ function downloadTorrent(urlTorrent) {
     chrome.downloads.download({
         url: urlTorrent
     }, function (idDownload) {
-        /*if (idDownload === undefined || idDownload.state === 'interrupted') {
-         //Fall� la descarga, a�ado el torrent a errores
-         var errores = JSON.parse(localStorage.getItem('errores'));
-         if (errores === null || errores === undefined) {
-         errores = [];
-         }
-
-         errores.push(urlTorrent);
-         localStorage.setItem('errores', JSON.stringify(errores));
-         }*/
     });
 }
 
-function retryErrorTorrents() {
-    var errores = JSON.parse(localStorage.getItem('errores'));
-
-    var limpio = [];
-    //Limpio ya que voy a intentar de nuevo bajarlos
-    localStorage.setItem('errores', JSON.stringify(limpio));
-
-    if (errores !== null && errores !== undefined) {
-        errores.forEach(function (tId, index, array) {
-            downloadTorrent(tId);
-        });
-    }
-}
-
-function ErroresDialogController($scope, $mdDialog, $window) {
-    $scope.errores = JSON.parse(localStorage.getItem('errores'));
-    $scope.cambios = 0;
-
-    $scope.hide = function () {
-        $mdDialog.hide($scope.cambios);
-    };
-    $scope.downloadErrorTorrents = function () {
-        retryErrorTorrents();
-        $scope.cambios++;
-        $mdDialog.hide($scope.cambios);
-    };
-
-    $scope.openLink = function (id) {
-        $window.open('http://txibitsoft.com/bajatorrent.php?id=' + id, '_blank');
-        $scope.cambios++;
-    };
-
-    $scope.deleteError = function (id) {
-        var idx = $scope.errores.indexOf(id);
-
-        if (idx >= 0) {
-            $scope.errores.splice(idx, 1);
-            localStorage.setItem('errores', JSON.stringify($scope.errores));
-            $scope.cambios++;
-        }
-    };
-}
-
-function DownloadsDialogController($scope, $mdDialog) {
-    $scope.downloads = JSON.parse(localStorage.getItem('downloads'));
-
-    $scope.hide = function () {
-        $mdDialog.hide($scope.cambios);
-    };
-    $scope.downloadTorrents = function () {
-        //Creo un alarm para intentar descargar
-        chrome.alarms.create('downloadTrex', {
-            delayInMinutes: 1
-        });
-    };
-}
