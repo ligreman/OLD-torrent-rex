@@ -98,8 +98,12 @@ html p, body p {
 }
 
 .md-subheader.md-primary.custom.md-sticky-clone {
-    top: 68px;
-    width: 477px;
+    top: 68px !important;
+    width: 477px !important;
+}
+
+.md-subheader:not(.md-sticky-no-effect):after {
+    right: 0 !important;
 }
 
 .item-hover {
@@ -198,8 +202,14 @@ md-backdrop.md-opaque.md-default-theme, .md-dialog-container {
 }
 
 #popup md-toolbar.botonera {
-    padding-top: 4px;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
+    padding: 0;
     background-color: rgba(63, 81, 181, 0.2);
+}
+
+#popup md-toolbar.botonera div.blanco {
+    padding: 4px;
+    background-color: rgba(255, 255, 255, 0.8);
 }
 
 .last-check {

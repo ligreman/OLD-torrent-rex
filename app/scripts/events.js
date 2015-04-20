@@ -23,7 +23,7 @@ var constantes = {
 
 function checkDownloads() {
     var status = (localStorage.getItem('trexStatus') === 'true'),
-        series, newTorrents = null, url, datos, lastSerie;
+        series, newTorrents = [], url, datos, lastSerie;
 
     logger("Comienzo la comprobación de descargas");
 
@@ -44,7 +44,6 @@ function checkDownloads() {
 
             logger("  Miro la serie: " + series[i].title);
 
-            newTorrents = [];
             //Pido al ws la lista de torrents de la serie
             url = atob(series[i].url);
             var xmlhttp = new XMLHttpRequest();
@@ -91,7 +90,7 @@ function checkDownloads() {
             xmlhttp.send();
         }
 
-        //Descargo lo nuevo
+        //Cojo lo nuevo
         if (newTorrents !== null) {
             //Voy una a una bajando y generando notificación
             var notifications = JSON.parse(localStorage.getItem('notifications')),
